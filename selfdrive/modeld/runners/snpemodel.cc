@@ -244,4 +244,3 @@ void SNPEModel::execute() {
   }
 #endif
 }
-

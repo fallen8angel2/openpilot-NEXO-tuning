@@ -348,7 +348,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
         if (QUIState::ui_state.scene.torqueMaxLatAccel <= 1) QUIState::ui_state.scene.torqueMaxLatAccel = 1;
         QString value = QString::number(QUIState::ui_state.scene.torqueMaxLatAccel);
         Params().put("TorqueMaxLatAccel", value.toStdString());
-        return;
+        return;        
       } else if (QUIState::ui_state.scene.live_tune_panel_list == (QUIState::ui_state.scene.list_count+4) && QUIState::ui_state.scene.lateralControlMethod == 3) {
         QUIState::ui_state.scene.torqueFriction = QUIState::ui_state.scene.torqueFriction - 1;
         if (QUIState::ui_state.scene.torqueFriction <= 0) QUIState::ui_state.scene.torqueFriction = 0;
@@ -462,13 +462,13 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
         if (QUIState::ui_state.scene.torqueKi >= max_lat_accel) QUIState::ui_state.scene.torqueKi = max_lat_accel;
         QString value = QString::number(QUIState::ui_state.scene.torqueKi);
         Params().put("TorqueKi", value.toStdString());
-        return;
+        return;        
       } else if (QUIState::ui_state.scene.live_tune_panel_list == (QUIState::ui_state.scene.list_count+3) && QUIState::ui_state.scene.lateralControlMethod == 3) {
         QUIState::ui_state.scene.torqueMaxLatAccel = QUIState::ui_state.scene.torqueMaxLatAccel + 1;
         if (QUIState::ui_state.scene.torqueMaxLatAccel >= 50) QUIState::ui_state.scene.torqueMaxLatAccel = 50;
         QString value = QString::number(QUIState::ui_state.scene.torqueMaxLatAccel);
         Params().put("TorqueMaxLatAccel", value.toStdString());
-        return;
+        return;        
       } else if (QUIState::ui_state.scene.live_tune_panel_list == (QUIState::ui_state.scene.list_count+4) && QUIState::ui_state.scene.lateralControlMethod == 3) {
         QUIState::ui_state.scene.torqueFriction = QUIState::ui_state.scene.torqueFriction + 1;
         if (QUIState::ui_state.scene.torqueFriction >= 30) QUIState::ui_state.scene.torqueFriction = 30;

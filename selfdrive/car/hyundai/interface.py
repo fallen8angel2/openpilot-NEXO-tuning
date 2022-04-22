@@ -56,7 +56,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerActuatorDelay = 0.25  # Default delay
     ret.steerRateCost = 0.35
-    ret.steerLimitTimer = 0.8
+    ret.steerLimitTimer = 1.0
     tire_stiffness_factor = 1.
 
     ret.longitudinalTuning.kpBP = [0., 4., 9., 17., 23., 31.]
@@ -155,7 +155,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1675. + STD_CARGO_KG
       ret.wheelbase = 2.845
     elif candidate in (CAR.GRANDEUR_IG_FL, CAR.GRANDEUR_IG_FL_HEV):
-      ret.mass = 1675. + STD_CARGO_KG
+      ret.mass = 1725. + STD_CARGO_KG
       ret.wheelbase = 2.885
     elif candidate == CAR.VELOSTER:
       ret.mass = 3558. * CV.LB_TO_KG
@@ -307,8 +307,8 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.curvSpeedDown)
     if self.CC.autohold_popup_timer:
       events.add(EventName.brakeHold)
-    if self.CC.auto_res_starting:
-      events.add(EventName.resCruise)
+    # if self.CC.auto_res_starting:
+    #   events.add(EventName.resCruise)
     if self.CS.cruiseState_standstill or self.CC.standstill_status == 1:
       #events.add(EventName.standStill)
       self.CP.standStill = True

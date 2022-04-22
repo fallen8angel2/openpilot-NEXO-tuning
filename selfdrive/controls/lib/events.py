@@ -4,6 +4,7 @@ from typing import Dict, Union, Callable, List, Optional
 
 from cereal import log, car
 import cereal.messaging as messaging
+from common.conversions import Conversions as CV
 from common.realtime import DT_CTRL
 from common.conversions import Conversions as CV
 from selfdrive.locationd.calibrationd import MIN_SPEED_FILTER
@@ -171,7 +172,7 @@ class EngagementAlert(Alert):
     super().__init__("", "",
                      AlertStatus.normal, AlertSize.none,
                      Priority.MID, VisualAlert.none,
-                     audible_alert, .2),
+                     audible_alert, 2.2),
 
 
 class NormalPermanentAlert(Alert):
