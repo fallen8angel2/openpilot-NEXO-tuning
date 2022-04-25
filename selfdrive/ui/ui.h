@@ -66,16 +66,16 @@ const Rect map_overlay_btn = {0, 465, 150, 150};
 const Rect map_return_btn = {1770, 465, 150, 150};
 const Rect map_btn = {1340, 900, 200, 180};
 const Rect mapbox_btn = {465, 905, 140, 140};
-const Rect rec_btn = {1740, 900, 200, 180};
+const Rect rec_btn = {1540, 15, 200, 180};
 const Rect laneless_btn = {1540, 900, 200, 180};
 const Rect monitoring_btn = {50, 830, 140, 140};
 const Rect ml_btn = {1265, 905, 140, 140};
 const Rect stockui_btn = {15, 15, 184, 202};
 const Rect tuneui_btn = {1720, 15, 184, 202};
-const Rect livetunepanel_left_btn = {500, 730, 170, 160};
-const Rect livetunepanel_right_btn = {1250, 730, 170, 160};
-const Rect livetunepanel_left_above_btn = {500, 550, 170, 160};
-const Rect livetunepanel_right_above_btn = {1250, 550, 170, 160};
+const Rect livetunepanel_left_btn = {400, 730, 250, 200};
+const Rect livetunepanel_right_btn = {1250, 730, 250, 200};
+const Rect livetunepanel_left_above_btn = {400, 500, 250, 200};
+const Rect livetunepanel_right_above_btn = {1250, 500, 250, 200};
 const Rect speedlimit_btn = {220, 15, 190, 190};
 
 struct Alert {
