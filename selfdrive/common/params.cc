@@ -359,6 +359,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"AnimatedRPM", PERSISTENT},
     {"AnimatedRPMMax", PERSISTENT},
     {"ShowStopLine", PERSISTENT},
+    {"NoSmartMDPS", PERSISTENT},
 };
 
 } // namespace
