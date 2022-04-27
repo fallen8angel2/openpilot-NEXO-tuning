@@ -4388,7 +4388,7 @@ TorqueKf::TorqueKf() : AbstractControl("Kf", "Adjust Kf", "../assets/offroad/ico
     refresh();
   });
   
- QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+  QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
     auto str = QString::fromStdString(params.get("TorqueKf"));
     auto str1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
     int value = str.toInt();
@@ -4456,7 +4456,7 @@ TorqueKi::TorqueKi() : AbstractControl("Ki", "Adjust Ki", "../assets/offroad/ico
     refresh();
   });
   
- QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+  QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
     auto str = QString::fromStdString(params.get("TorqueKi"));
     auto str1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
     int value = str.toInt();
@@ -4524,7 +4524,7 @@ TorqueFriction::TorqueFriction() : AbstractControl("Friction", "Adjust Friction"
     refresh();
   });
   
- QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+  QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
     auto str = QString::fromStdString(params.get("TorqueFriction"));
     int value = str.toInt();
     value = value + 1;

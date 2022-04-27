@@ -236,6 +236,9 @@ struct CarState {
   aReqValue @54 :Float32;
   engineRpm @55 :Float32;
 
+  # Hoya
+  currentGear @56 :Float32;  
+
   struct TPMS {
     unit @0 :Int8;
     fl @1 :Float32;
@@ -554,6 +557,8 @@ struct CarParams {
     ki @2 :Float32;
     friction @3 :Float32;
     kf @4 :Float32;
+    deadzoneBP @5 :List(Float32);
+    deadzoneV @6 :List(Float32);    
   }
 
   struct LongitudinalPIDTuning {

@@ -26,7 +26,6 @@ int main(int argc, char* argv[]) {
   mdl.addTrafficConvention(traffic_convention, TRAFFIC_CONVENTION_LEN);
   mdl.addImage(input, 0);
   mdl.addExtra(extra, 0);
-
   // first run
   printf("************** execute 1 **************\n");
   memset(output, 0, OUTPUT_SIZE * sizeof(float));

@@ -23,6 +23,14 @@ from decimal import Decimal
 LOW_SPEED_FACTOR = 200
 JERK_THRESHOLD = 0.2
 
+def apply_deadzone(error, deadzone):
+  if error > deadzone:
+    error -= deadzone
+  elif error < - deadzone:
+    error += deadzone
+  else:
+    error = 0.
+  return error
 
 class LatControlTorque(LatControl):
   def __init__(self, CP, CI):
@@ -38,6 +46,8 @@ class LatControlTorque(LatControl):
     self.pid.neg_limit = -self.steer_max
     self.use_steering_angle = CP.lateralTuning.torque.useSteeringAngle
     self.friction = CP.lateralTuning.torque.friction
+    self.deadzoneBP = CP.lateralTuning.torque.deadzoneBP
+    self.deadzoneV = CP.lateralTuning.torque.deadzoneV
 
     self.live_tune_enabled = False
 
@@ -75,6 +85,7 @@ class LatControlTorque(LatControl):
       output_torque = 0.0
       pid_log.active = False
       self.pid.reset()
+      angle_steers_des = 0.0      
     else:
       if self.use_steering_angle:
         actual_curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
@@ -87,10 +98,14 @@ class LatControlTorque(LatControl):
       setpoint = desired_lateral_accel + LOW_SPEED_FACTOR * desired_curvature
       measurement = actual_lateral_accel + LOW_SPEED_FACTOR * actual_curvature
       error = setpoint - measurement
-      pid_log.error = error
+
+      deadzone = interp(CS.vEgo, self.deadzoneBP, self.deadzoneV)
+      error_deadzone = apply_deadzone(error, deadzone)
+
+      pid_log.error = error_deadzone
 
       ff = desired_lateral_accel - params.roll * ACCELERATION_DUE_TO_GRAVITY
-      output_torque = self.pid.update(error,
+      output_torque = self.pid.update(error_deadzone,
                                       override=CS.steeringPressed, feedforward=ff,
                                       speed=CS.vEgo,
                                       freeze_integrator=CS.steeringRateLimited)
@@ -106,5 +121,8 @@ class LatControlTorque(LatControl):
       pid_log.output = -output_torque
       pid_log.saturated = self._check_saturation(self.steer_max - abs(output_torque) < 1e-3, CS)
 
+      # Neokii
+      angle_steers_des = math.degrees(VM.get_steer_from_curvature(-desired_curvature, CS.vEgo, params.roll)) + params.angleOffsetDeg      
+
     #TODO left is positive in this convention
-    return -output_torque, 0.0, pid_log
+    return -output_torque, angle_steers_des, pid_log
