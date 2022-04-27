@@ -273,7 +273,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"OpkrMonitorEyesThreshold", PERSISTENT},
     {"OpkrMonitorNormalEyesThreshold", PERSISTENT},
     {"OpkrMonitorBlinkThreshold", PERSISTENT},
-    {"MadModeEnabled", PERSISTENT},
+    {"UFCModeEnabled", PERSISTENT},
     {"CommaStockUI", PERSISTENT},
     {"OpkrEnableUploader", PERSISTENT},
     {"OpkrMapEnable", CLEAR_ON_MANAGER_START},
