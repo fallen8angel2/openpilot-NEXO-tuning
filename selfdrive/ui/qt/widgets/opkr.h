@@ -2281,3 +2281,17 @@ private:
   
   void refresh();
 };
+
+class UserSpecificFeature : public AbstractControl {
+  Q_OBJECT
+
+public:
+  UserSpecificFeature();
+
+private:
+  QPushButton btn;
+  QLineEdit edit;
+  Params params;
+
+  void refresh();
+};
