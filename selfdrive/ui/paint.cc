@@ -959,7 +959,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     char uom_str[6];
     std::string cpu_usage_val = std::to_string(int(scene.cpuPerc)) + "%";
     NVGcolor val_color = COLOR_GREEN_ALPHA(200);
-    if(scene.cpuPerc > 80) {
+    if(scene.cpuPerc > 90) {
       val_color = COLOR_RED_ALPHA(200);
     } else if(scene.cpuPerc > 60) {
       val_color = COLOR_ORANGE_ALPHA(200);
