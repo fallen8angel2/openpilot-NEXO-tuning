@@ -1075,7 +1075,6 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
   if (scene.engine_rpm < 9998) {
     char val_str[16];
     char uom_str[6];
-    // std::string engine_rpm_val = std::to_string(int(scene.engine_rpm));
     NVGcolor val_color = COLOR_WHITE_ALPHA(200);
     if(scene.engine_rpm == 0) {
        snprintf(val_str, sizeof(val_str), "Off");
@@ -1090,12 +1089,10 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
       snprintf(val_str, sizeof(val_str), "%.0f", (scene.engine_rpm));
     }    
     snprintf(uom_str, sizeof(uom_str), "rpm");
-    // bb_ry +=bb_ui_draw_measure(s, engine_rpm_val.c_str(), uom_str, "ENG RPM",
     bb_ry +=bb_ui_draw_measure(s, val_str, uom_str, "ENG RPM",
         bb_rx, bb_ry, bb_uom_dx,
         val_color, lab_color, uom_color,
         value_fontSize, label_fontSize, uom_fontSize, false);
-        value_fontSize, label_fontSize, uom_fontSize, 0);
   }
 
   //finally draw the frame
