@@ -926,7 +926,7 @@ static int bb_ui_draw_measure(UIState *s, const char* bb_value, const char* bb_u
 static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w ) {
   UIScene &scene = s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
-  int bb_ry = bb_y - 40;
+  int bb_ry = bb_y - 20;
   NVGcolor lab_color = COLOR_WHITE_ALPHA(200);
   NVGcolor uom_color = COLOR_WHITE_ALPHA(200);
   int value_fontSize=30;
@@ -1097,7 +1097,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
 
   //finally draw the frame
   nvgBeginPath(s->vg);
-  nvgRoundedRect(s->vg, bb_x, bb_y - 20, bb_w, bb_ry - bb_y + 55, 20);
+  nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_ry - bb_y + 45, 20);
   nvgStrokeColor(s->vg, COLOR_WHITE_ALPHA(80));
   nvgStrokeWidth(s->vg, 6);
   nvgStroke(s->vg);
