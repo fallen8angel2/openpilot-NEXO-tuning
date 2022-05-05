@@ -904,11 +904,11 @@ static int bb_ui_draw_measure(UIState *s, const char* bb_value, const char* bb_u
     if (strlen(bb_uom) > 0) {
         nvgSave(s->vg);
       int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
-      int ry = bb_y + (int)(bb_valueFontSize*2.0/2) + (int)(bb_labelFontSize*2.0)+5+25;
+      int ry = bb_y + (int)(bb_valueFontSize*2.0/2) + (int)(bb_labelFontSize*2.0)+5+15;
       nvgTranslate(s->vg,rx,ry);
       nvgRotate(s->vg, -1.5708); //-90deg in radians
       nvgFontFace(s->vg, "sans-regular");
-      nvgFontSize(s->vg, (int)(bb_uomFontSize*2.0));
+      nvgFontSize(s->vg, (int)(bb_uomFontSize*2.5));
       nvgFillColor(s->vg, bb_uomColor);
       if (custom == 2) {
         nvgFontFace(s->vg, "KaiGenGothicKR-Medium");
