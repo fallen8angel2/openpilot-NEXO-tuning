@@ -899,7 +899,7 @@ static int bb_ui_draw_measure(UIState *s, const char* bb_value, const char* bb_u
     nvgFontFace(s->vg, "sans-semibold");
     nvgFontSize(s->vg, bb_valueFontSize*2.5);
     nvgFillColor(s->vg, bb_valueColor);
-    nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.0)+5 + (int)(bb_labelFontSize*2.0)+5, bb_value, NULL);
+    nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.0)+5 + (int)(bb_labelFontSize*2.0)+25, bb_value, NULL);
     //print uom
     if (strlen(bb_uom) > 0) {
         nvgSave(s->vg);
