@@ -195,7 +195,7 @@ class CarController():
     elif CP.lateralTuning.which() == 'lqr':
       self.str_log2 = 'T={:04.0f}/{:05.3f}/{:07.5f}'.format(CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain)
     elif CP.lateralTuning.which() == 'torque':
-      self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.2f}'.format(CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction)
+      self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction)
 
     self.sm = messaging.SubMaster(['controlsState', 'radarState', 'longitudinalPlan'])
 
@@ -770,7 +770,7 @@ class CarController():
             elif aReqValue > 0.0:
               accel = interp(CS.lead_distance, [14.0, 15.0], [max(accel, aReqValue, faccel), aReqValue])
             elif aReqValue < 0.0 and CS.lead_distance <= 4.2 and accel >= aReqValue and lead_objspd <= 0 and self.stopping_dist_adj_enabled:
-              accel = self.accel - (DT_CTRL * interp(CS.out.vEgo, [0.9, 3.0], [1.0, 3.0-(0.5*(3.0-CS.cruiseGapSet))]))
+              accel = self.accel - (DT_CTRL * interp(CS.out.vEgo, [1.0, 4.0], [1.0, 3.0-(0.5*(3.0-CS.cruiseGapSet))]))
             elif aReqValue < 0.0 and lead_objspd <= -15:
               accel = interp(abs(lead_objspd), [15.0, 30.0], [(accel + aReqValue)/2, min(accel, aReqValue)])
             elif aReqValue < 0.0 and self.stopping_dist_adj_enabled:
