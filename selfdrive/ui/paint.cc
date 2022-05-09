@@ -866,17 +866,17 @@ static int bb_ui_draw_measure(UIState *s, const char* bb_value, const char* bb_u
     // nvgFontFace(s->vg, "sans-semibold");
     // nvgFontSize(s->vg, bb_valueFontSize*0.8);
     // nvgFillColor(s->vg, bb_valueColor);
-    // nvgText(s->vg, bb_x-dx/2-20, bb_y+ (int)(bb_valueFontSize*2.5)+5-20, bb_value, NULL);
+    // nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.0)+5 + (int)(bb_labelFontSize*2.0)+25, bb_value, NULL);
     //print label
     nvgFontFace(s->vg, "sans-regular");
     nvgFontSize(s->vg, bb_labelFontSize*2.5);
     nvgFillColor(s->vg, bb_labelColor);
-    nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.5)+5 + (int)(bb_labelFontSize*2.5)+5, bb_label, NULL);
+    nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.0)+5, bb_label, NULL);
     //print uom
     if (strlen(bb_uom) > 0) {
         nvgSave(s->vg);
       int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
-      int ry = bb_y + (int)(bb_valueFontSize*2.5/2)+25;
+      int ry = bb_y + (int)(bb_valueFontSize*2.0/2) + (int)(bb_labelFontSize*2.0)+5+25;
       nvgTranslate(s->vg,rx,ry);
       nvgRotate(s->vg, -1.5708); //-90deg in radians
       nvgFontFace(s->vg, "sans-regular");
@@ -890,21 +890,21 @@ static int bb_ui_draw_measure(UIState *s, const char* bb_value, const char* bb_u
     if (strlen(bb_uom) > 0) {
       dx = (int)(bb_uomFontSize*2.5/2);
     }
-    //print value
-    nvgFontFace(s->vg, "sans-semibold");
-    nvgFontSize(s->vg, bb_valueFontSize*2.5);
-    nvgFillColor(s->vg, bb_valueColor);
-    nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.5)+5, bb_value, NULL);
     //print label
     nvgFontFace(s->vg, "sans-regular");
     nvgFontSize(s->vg, bb_labelFontSize*2.5);
     nvgFillColor(s->vg, bb_labelColor);
-    nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.5)+5 + (int)(bb_labelFontSize*2.5)+5, bb_label, NULL);
+    nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.0)+5, bb_label, NULL);
+    //print value
+    nvgFontFace(s->vg, "sans-semibold");
+    nvgFontSize(s->vg, bb_valueFontSize*2.5);
+    nvgFillColor(s->vg, bb_valueColor);
+    nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.0)+5 + (int)(bb_labelFontSize*2.0)+25, bb_value, NULL);
     //print uom
     if (strlen(bb_uom) > 0) {
         nvgSave(s->vg);
       int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
-      int ry = bb_y + (int)(bb_valueFontSize*2.5/2)+25;
+      int ry = bb_y + (int)(bb_valueFontSize*2.0/2) + (int)(bb_labelFontSize*2.0)+5+25;
       nvgTranslate(s->vg,rx,ry);
       nvgRotate(s->vg, -1.5708); //-90deg in radians
       nvgFontFace(s->vg, "sans-regular");
@@ -926,7 +926,7 @@ static int bb_ui_draw_measure(UIState *s, const char* bb_value, const char* bb_u
 static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w ) {
   UIScene &scene = s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
-  int bb_ry = bb_y - 40;
+  int bb_ry = bb_y - 20;
   NVGcolor lab_color = COLOR_WHITE_ALPHA(200);
   NVGcolor uom_color = COLOR_WHITE_ALPHA(200);
   int value_fontSize=30;
@@ -1097,7 +1097,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
 
   //finally draw the frame
   nvgBeginPath(s->vg);
-  nvgRoundedRect(s->vg, bb_x, bb_y - 20, bb_w, bb_ry - bb_y + 55, 20);
+  nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_ry - bb_y + 45, 20);
   nvgStrokeColor(s->vg, COLOR_WHITE_ALPHA(80));
   nvgStrokeWidth(s->vg, 6);
   nvgStroke(s->vg);
