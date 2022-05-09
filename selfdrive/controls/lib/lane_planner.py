@@ -1,7 +1,7 @@
 import numpy as np
 from cereal import log, messaging
 from common.filter_simple import FirstOrderFilter
-from common.numpy_fast import interp
+from common.numpy_fast import interp, clip, mean
 from common.realtime import DT_MDL
 from selfdrive.hardware import EON, TICI
 from selfdrive.swaglog import cloudlog
@@ -74,6 +74,9 @@ class LanePlanner:
     self.sm = messaging.SubMaster(['liveMapData'])
 
     self.total_camera_offset = self.camera_offset
+
+    self.readings = []
+    self.frame = 0
 
   def parse_model(self, md, sm, v_ego):
     curvature = sm['controlsState'].curvature
