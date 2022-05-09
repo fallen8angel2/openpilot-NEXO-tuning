@@ -8,6 +8,9 @@ from selfdrive.swaglog import cloudlog
 from common.params import Params
 from decimal import Decimal
 
+ENABLE_ZORROBYTE = True
+ENABLE_INC_LANE_PROB = True
+
 TRAJECTORY_SIZE = 33
 # camera offset is meters from center car to camera
 # model path is in the frame of the camera. Empirically 
@@ -177,19 +180,48 @@ class LanePlanner:
     l_prob *= l_std_mod
     r_prob *= r_std_mod
 
-    # Find current lanewidth
-    self.lane_width_certainty.update(l_prob * r_prob)
-    current_lane_width = abs(self.rll_y[0] - self.lll_y[0])
-    self.lane_width_estimate.update(current_lane_width)
-    speed_lane_width = interp(v_ego, self.spd_lane_width_spd, self.spd_lane_width_set)
-    self.lane_width = self.lane_width_certainty.x * self.lane_width_estimate.x + \
-                      (1 - self.lane_width_certainty.x) * speed_lane_width
+    # Reduce reliance on uncertain lanelines
+    l_std_mod = interp(self.lll_std, [.15, .3], [1.0, 0.0])
+    r_std_mod = interp(self.rll_std, [.15, .3], [1.0, 0.0])
+    l_prob *= l_std_mod
+    r_prob *= r_std_mod
+
+    if ENABLE_ZORROBYTE:
+      # zorrobyte code
+      if l_prob > 0.5 and r_prob > 0.5:
+        self.frame += 1
+        if self.frame > 20:
+          self.frame = 0
+          current_lane_width = clip(abs(self.rll_y[0] - self.lll_y[0]), 2.5, 3.5)
+          self.readings.append(current_lane_width)
+          self.lane_width = mean(self.readings)
+          if len(self.readings) >= 30:
+            self.readings.pop(0)
+
+      # zorrobyte
+      # Don't exit dive
+      if abs(self.rll_y[0] - self.lll_y[0]) > self.lane_width:
+        r_prob = r_prob / interp(l_prob, [0, 1], [1, 3])
+
+    else:
+      # Find current lanewidth
+      self.lane_width_certainty.update(l_prob * r_prob)
+      current_lane_width = abs(self.rll_y[0] - self.lll_y[0])
+      self.lane_width_estimate.update(current_lane_width)
+      speed_lane_width = interp(v_ego, self.spd_lane_width_spd, self.spd_lane_width_set)
+      self.lane_width = self.lane_width_certainty.x * self.lane_width_estimate.x + \
+                        (1 - self.lane_width_certainty.x) * speed_lane_width
 
     clipped_lane_width = min(4.0, self.lane_width)
     path_from_left_lane = self.lll_y + clipped_lane_width / 2.0
     path_from_right_lane = self.rll_y - clipped_lane_width / 2.0
 
     self.d_prob = l_prob + r_prob - l_prob * r_prob
+
+    # neokii
+    if ENABLE_INC_LANE_PROB and self.d_prob > 0.65:
+      self.d_prob = min(self.d_prob * 1.3, 1.0)
+
     lane_path_y = (l_prob * path_from_left_lane + r_prob * path_from_right_lane) / (l_prob + r_prob + 0.0001)
     safe_idxs = np.isfinite(self.ll_t)
     if safe_idxs[0]:
