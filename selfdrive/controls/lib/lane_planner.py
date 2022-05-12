@@ -1,4 +1,3 @@
-from pickle import FALSE
 import numpy as np
 from cereal import log, messaging
 from common.filter_simple import FirstOrderFilter
