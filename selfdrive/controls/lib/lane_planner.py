@@ -8,7 +8,7 @@ from selfdrive.swaglog import cloudlog
 from common.params import Params
 from decimal import Decimal
 
-ENABLE_ZORROBYTE = True
+ENABLE_ZORROBYTE = False
 ENABLE_INC_LANE_PROB = True
 
 TRAJECTORY_SIZE = 33
