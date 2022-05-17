@@ -23,6 +23,7 @@ from decimal import Decimal
 
 LOW_SPEED_FACTOR = 200
 JERK_THRESHOLD = 0.2
+ERROR_RATE_FRAME = 5 # Neokii
 
 def apply_deadzone(error, deadzone):
   if error > deadzone:
@@ -51,6 +52,7 @@ class LatControlTorque(LatControl):
     self.deadzoneBP = CP.lateralTuning.torque.deadzoneBP
     self.deadzoneV = CP.lateralTuning.torque.deadzoneV
 
+    self.errors = []
     self.live_tune_enabled = False
 
     self.lt_timer = 0
@@ -58,6 +60,7 @@ class LatControlTorque(LatControl):
   def reset(self):
     super().reset()
     self.pid.reset()
+    self.errors = []    
 
   def live_tune(self, CP):
     self.mpc_frame += 1
@@ -88,6 +91,7 @@ class LatControlTorque(LatControl):
       pid_log.active = False
       if not active:
         self.pid.reset()
+        self.errors = []        
       angle_steers_des = 0.0      
     else:
       if self.use_steering_angle:
@@ -102,6 +106,15 @@ class LatControlTorque(LatControl):
       measurement = actual_lateral_accel + LOW_SPEED_FACTOR * actual_curvature
       error = setpoint - measurement
 
+      # Neokii
+      error_rate = 0
+      if len(self.errors) >= ERROR_RATE_FRAME:
+        error_rate = (error - self.errors[-ERROR_RATE_FRAME]) / ERROR_RATE_FRAME
+
+      self.errors.append(float(error))
+      while len(self.errors) > ERROR_RATE_FRAME:
+        self.errors.pop(0)
+
       deadzone = interp(CS.vEgo, self.deadzoneBP, self.deadzoneV)
       error_deadzone = apply_deadzone(error, deadzone)
 
@@ -111,16 +124,10 @@ class LatControlTorque(LatControl):
       # convert friction into lateral accel units for feedforward
       friction_compensation = interp(desired_lateral_jerk, [-JERK_THRESHOLD, JERK_THRESHOLD], [-self.friction, self.friction])
       ff += friction_compensation / self.kf
-
-      # Neokii
-      # Prevent integrator windup at very low speed
-      # or when steering is limited
-      freeze_integrator = CS.steeringRateLimited or CS.vEgo < 5
-
-      output_torque = self.pid.update(error_deadzone,
+      output_torque = self.pid.update(error_deadzone, error_rate,
                                       override=CS.steeringPressed, feedforward=ff,
                                       speed=CS.vEgo,
-                                      freeze_integrator=freeze_integrator)
+                                      freeze_integrator=CS.steeringRateLimite)
 
       pid_log.active = True
       pid_log.p = self.pid.p
