@@ -111,16 +111,10 @@ class LatControlTorque(LatControl):
       # convert friction into lateral accel units for feedforward
       friction_compensation = interp(desired_lateral_jerk, [-JERK_THRESHOLD, JERK_THRESHOLD], [-self.friction, self.friction])
       ff += friction_compensation / self.kf
-
-      # Neokii
-      # Prevent integrator windup at very low speed
-      # or when steering is limited
-      freeze_integrator = CS.steeringRateLimited or CS.vEgo < 5
-
       output_torque = self.pid.update(error_deadzone,
                                       override=CS.steeringPressed, feedforward=ff,
                                       speed=CS.vEgo,
-                                      freeze_integrator=freeze_integrator)
+                                      freeze_integrator=CS.steeringRateLimited)
 
       pid_log.active = True
       pid_log.p = self.pid.p
