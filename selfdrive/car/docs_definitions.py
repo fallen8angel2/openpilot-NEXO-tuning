@@ -77,7 +77,7 @@ class CarInfo:
       Column.FSR_LONGITUDINAL: min_enable_speed <= 0.,
       Column.FSR_STEERING: min_steer_speed <= 0.,
       Column.STEERING_TORQUE: self.good_torque,
-      Column.MAINTAINED: CP.carFingerprint not in non_tested_cars and self.harness is not Harness.none,
+      Column.MAINTAINED: CP.carFingerprint not in non_tested_cars  #and self.harness is not Harness.none,
     }
 
     if CP.notCar:
