@@ -1253,6 +1253,9 @@ private:
   QLabel label;
   Params params;
   
+  int latcontrol;
+
+
   void refresh();
 };
 

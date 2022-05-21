@@ -3581,25 +3581,25 @@ LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set th
   hlayout->addWidget(&btnminus);
   hlayout->addWidget(&btnplus);
 
+  auto str = QString::fromStdString(params.get("LateralControlMethod"));
+  latcontrol = str.toInt();  
+
   QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
-    auto str = QString::fromStdString(params.get("LateralControlMethod"));
-    int latcontrol = str.toInt();
-    latcontrol = latcontrol - 1;
-    if (latcontrol < 0) {
-      latcontrol = 4;
-    }
+    latcontrol--;
+    if (latcontrol < 0)  
+        latcontrol = 4;
+
     QString latcontrols = QString::number(latcontrol);
     params.put("LateralControlMethod", latcontrols.toStdString());
     refresh();
   });
 
   QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
-    auto str = QString::fromStdString(params.get("LateralControlMethod"));
-    int latcontrol = str.toInt();
-    latcontrol = latcontrol + 1;
-    if (latcontrol > 4) {
+    latcontrol++;
+
+    if (latcontrol > 4) 
       latcontrol = 0;
-    }
+    
     QString latcontrols = QString::number(latcontrol);
     params.put("LateralControlMethod", latcontrols.toStdString());
     refresh();
@@ -3607,19 +3607,20 @@ LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set th
   refresh();
 }
 
-void LateralControl::refresh() {
-  QString latcontrol = QString::fromStdString(params.get("LateralControlMethod"));
-  if (latcontrol == "0") {
-    label.setText(QString::fromStdString("PID"));
-  } else if (latcontrol == "1") {
-    label.setText(QString::fromStdString("INDI"));
-  } else if (latcontrol == "2") {
-    label.setText(QString::fromStdString("LQR"));
-  } else if (latcontrol == "3") {
-    label.setText(QString::fromStdString("TORQUE"));
-  } else if (latcontrol == "4") {
-    label.setText(QString::fromStdString("TORQUE+LQR"));
-  }  
+void LateralControl::refresh() 
+{
+
+  QString  strLatcontrols;
+  switch( latcontrol )
+  {
+    case 0 : strLatcontrols = "0.PID"; break;
+    case 1 : strLatcontrols = "1.INDI";  break;
+    case 2 : strLatcontrols = "2.LQR";  break;
+    case 3 : strLatcontrols = "3.TORQUE";  break;
+    case 4 : strLatcontrols = "4.TORQUE+LQR";  break;
+  }
+
+  label.setText( strLatcontrols );
 }
 
 PidKp::PidKp() : AbstractControl("Kp", "Adjust Kp", "../assets/offroad/icon_shell.png") {
