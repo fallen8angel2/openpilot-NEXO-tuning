@@ -332,7 +332,7 @@ static void ui_draw_debug(UIState *s) {
         case  1: szLaCMethod = "INDI"; break;
         case  2: szLaCMethod = "LQR"; break;
         case  3: szLaCMethod = "TORQUE"; break;
-        case  4: szLaCMethod = "TORQUE+LQR"; break;
+        case  4: szLaCMethod = "HYBRID"; break;
       }
 
       if( szLaCMethod )

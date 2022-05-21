@@ -109,7 +109,7 @@ class CarInterface(CarInterfaceBase):
     elif lat_control_method == 3:
       set_lat_tune(ret.lateralTuning, LatTunes.TORQUE)
     elif lat_control_method == 4:
-      set_lat_tune(ret.lateralTuning, LatTunes.ATOM)      
+      set_lat_tune(ret.lateralTuning, LatTunes.ATOM)    # Hybrid tune  
 
     # genesis
     if candidate == CAR.GENESIS_DH:

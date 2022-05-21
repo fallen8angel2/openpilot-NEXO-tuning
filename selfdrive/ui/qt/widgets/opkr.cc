@@ -3617,7 +3617,7 @@ void LateralControl::refresh()
     case 1 : str = "1.INDI";  break;
     case 2 : str = "2.LQR";  break;
     case 3 : str = "3.TORQUE";  break;
-    case 4 : str = "4.TORQUE+LQR";  break;
+    case 4 : str = "4.HYBRID";  break;
   }
 
   label.setText( str );
