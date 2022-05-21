@@ -484,51 +484,16 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
   // opkr live ui tune
   if ( QUIState::ui_state.scene.live_tune_panel_enable && QUIState::ui_state.scene.started && !sidebar->isVisible() && !QUIState::ui_state.scene.map_on_top ) 
   {
+    int nBtnDir = 0;
+
     if (  livetunepanel_left_btn.ptInRect(e->x(), e->y())) 
     {
+        nBtnDir = -1;
 
-      mousePressCommon(  e, -1 );
-
-      // 0. PID
-      if( QUIState::ui_state.scene.lateralControlMethod == 0 )
-      {
-         mousePressPID( e, -1 );
-      } 
-      else if ( QUIState::ui_state.scene.lateralControlMethod == 1) // 1. INDI
-      {        
-        mousePressINDI( e, -1 );
-      }
-      else if ( QUIState::ui_state.scene.lateralControlMethod == 2) // 2. LQR
-      {
-        mousePressLQR( e, -1 );
-      }
-      else if ( QUIState::ui_state.scene.lateralControlMethod == 3) // 3. TORQ
-      {
-        mousePressTORQ( e, -1 );
-      }
-      return;
     }
     else if ( livetunepanel_right_btn.ptInRect(e->x(), e->y())) 
     {
-      mousePressCommon(  e, 1 );
-      // 0. PID
-      if( QUIState::ui_state.scene.lateralControlMethod == 0 )
-      {
-         mousePressPID( e, 1 );
-      } 
-      else if ( QUIState::ui_state.scene.lateralControlMethod == 1) // 1. INDI
-      {        
-        mousePressINDI( e, 1 );
-      }
-      else if ( QUIState::ui_state.scene.lateralControlMethod == 2) // 2. LQR
-      {
-        mousePressLQR( e, 1 );
-      }
-      else if ( QUIState::ui_state.scene.lateralControlMethod == 3) // 3. TORQ
-      {
-        mousePressTORQ( e, 1 );
-      }
-      return;
+       nBtnDir = 1;
     }
     else if ( livetunepanel_left_above_btn.ptInRect(e->x(), e->y())) 
     {
@@ -563,6 +528,29 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
 
       if( QUIState::ui_state.scene.live_tune_panel_list > nLoop )  return;
       QUIState::ui_state.scene.live_tune_panel_list = 0;
+      return;
+    }
+
+    if( nBtnDir )
+    {
+      mousePressCommon(  e, nBtnDir );
+      // 0. PID
+      if( QUIState::ui_state.scene.lateralControlMethod == 0 )
+      {
+         mousePressPID( e, nBtnDir );
+      } 
+      else if ( QUIState::ui_state.scene.lateralControlMethod == 1) // 1. INDI
+      {        
+        mousePressINDI( e, nBtnDir );
+      }
+      else if ( QUIState::ui_state.scene.lateralControlMethod == 2) // 2. LQR
+      {
+        mousePressLQR( e, nBtnDir );
+      }
+      else if ( QUIState::ui_state.scene.lateralControlMethod == 3) // 3. TORQ
+      {
+        mousePressTORQ( e, nBtnDir );
+      }
       return;
     }
   }
