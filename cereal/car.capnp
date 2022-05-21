@@ -534,7 +534,7 @@ struct CarParams {
   vFuture @79: Float32;
   aqValue @80: Float32;
   aqValueRaw @81: Float32;
-  torqueMaxSpeed @82: Float32;
+  torqueMaxSpeed @83: Float32;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);

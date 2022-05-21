@@ -54,7 +54,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.minSteerSpeed = 16.67 # m/s
 
-    ret.torqueMaxSpeed = 12.5
+
 
     # Most Hyundai car ports are community features for now
     ret.pcmCruise = not ret.radarOffCan
@@ -92,7 +92,7 @@ class CarInterface(CarInterfaceBase):
     ret.aqValueRaw = 0
 
     params = Params()
-
+    ret.torqueMaxSpeed = float( params.get("TorqueMaxSpeed", encoding="utf8") ) * CV.KPH_TO_MPH
     tire_stiffness_factor = float(Decimal(params.get("TireStiffnessFactorAdj", encoding="utf8")) * Decimal('0.01'))
     ret.steerActuatorDelay = float(Decimal(params.get("SteerActuatorDelayAdj", encoding="utf8")) * Decimal('0.01'))
     ret.steerRateCost = float(Decimal(params.get("SteerRateCostAdj", encoding="utf8")) * Decimal('0.01'))
@@ -109,7 +109,7 @@ class CarInterface(CarInterfaceBase):
     elif lat_control_method == 3:
       set_lat_tune(ret.lateralTuning, LatTunes.TORQUE)
     elif lat_control_method == 4:
-      set_lat_tune(ret.lateralTuning, LatTunes.ATOM)      
+      set_lat_tune(ret.lateralTuning, LatTunes.ATOM)    # Hybrid tune  
 
     # genesis
     if candidate == CAR.GENESIS_DH:

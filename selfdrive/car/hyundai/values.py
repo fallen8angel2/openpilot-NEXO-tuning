@@ -103,8 +103,8 @@ CAR_INFO: Dict[str, Union[HyundaiCarInfo, List[HyundaiCarInfo]]] = {
   CAR.VELOSTER_JS: HyundaiCarInfo("Hyundai Veloster 2019-20", "All", min_enable_speed=5. * CV.MPH_TO_MS, harness=Harness.hyundai_e),
   CAR.GRANDEUR_IG: HyundaiCarInfo("Hyundai Grandeur IG", "All", harness=Harness.hyundai_c),
   CAR.GRANDEUR_HEV_IG: HyundaiCarInfo("Hyundai Grandeur IG Hybrid", "All", harness=Harness.hyundai_c),
-  CAR.GRANDEUR_FL_IG: HyundaiCarInfo("Hyundai Grandeur IG FL", "All"),
-  CAR.GRANDEUR_HEV_FL_IG: HyundaiCarInfo("Hyundai Grandeur IG FL Hybrid", "All"),
+  CAR.GRANDEUR_FL_IG: HyundaiCarInfo("Hyundai Grandeur IG FL", "All", harness=Harness.hyundai_k),
+  CAR.GRANDEUR_HEV_FL_IG: HyundaiCarInfo("Hyundai Grandeur IG FL Hybrid", "All", harness=Harness.hyundai_k),
   CAR.TUCSON_TL: HyundaiCarInfo("Hyundai Tucson", "All"),
   CAR.NEXO_FE: HyundaiCarInfo("Hyundai Nexo", "All"),
 
