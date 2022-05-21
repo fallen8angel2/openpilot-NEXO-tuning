@@ -71,9 +71,17 @@ void HomeWindow::showDriverView(bool show) {
 
 int HomeWindow::clip( int &x, int lo, int hi)
 {
-    x = max(lo, min(hi, x))
+  int  nMin = hi;
 
-    return x;
+  if( hi > x )  nMin = x;
+
+  if( lo > nMin )
+    x = lo;
+  else
+    x = nMin;
+
+
+  return x;
 }
   
 
