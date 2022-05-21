@@ -314,6 +314,8 @@ void HomeWindow::mousePressTORQ(QMouseEvent* e, int nDir)
 void HomeWindow::mousePressEvent(QMouseEvent* e) 
 {
   float max_lat_accel = QUIState::ui_state.scene.torqueMaxLatAccel;
+
+  printf( "mousePressEvent = (%d,%d)\n", e->x(), e->y() );
   // OPKR add map
   if (QUIState::ui_state.scene.started && map_overlay_btn.ptInRect(e->x(), e->y())) {
     QSoundEffect effect1;
@@ -502,7 +504,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
       }
       else if ( QUIState::ui_state.scene.lateralControlMethod == 3) // 3. TORQ
       {
-        mousePressTORQ( e, -1 )
+        mousePressTORQ( e, -1 );
       }
       return;
     }
@@ -524,7 +526,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
       }
       else if ( QUIState::ui_state.scene.lateralControlMethod == 3) // 3. TORQ
       {
-        mousePressTORQ( e, 1 )
+        mousePressTORQ( e, 1 );
       }
       return;
     }
