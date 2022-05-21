@@ -1651,10 +1651,10 @@ static void ui_draw_live_tune_panel(UIState *s) {
   {        
     if (live_tune_panel_list == (s->scene.list_count+0)  ) {
       sprintf( szTuneParam, "%0.1f", s->scene.indiInnerLoopGain*0.1);
-      uszTuneName =  "INDI: ILGain";
+      szTuneName =  "INDI: ILGain";
     } else if (live_tune_panel_list == (s->scene.list_count+1)  ) {
       sprintf( szTuneParam, "%0.1f", s->scene.indiOuterLoopGain*0.1);
-      uszTuneName =  "INDI: OLGain";
+      szTuneName =  "INDI: OLGain";
     } else if (live_tune_panel_list == (s->scene.list_count+2)  ) {
       sprintf( szTuneParam, "%0.1f", s->scene.indiTimeConstant*0.1);
       szTuneName =  "INDI: TConst";
