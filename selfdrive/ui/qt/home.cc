@@ -480,7 +480,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
     return;
   }
   // opkr live ui tune
-  if ( QUIState::ui_state.scene.live_tune_panel_enable && QUIState::ui_state.scene.started && !sidebar->isVisible() && && !QUIState::ui_state.scene.map_on_top ) 
+  if ( QUIState::ui_state.scene.live_tune_panel_enable && QUIState::ui_state.scene.started && !sidebar->isVisible() && !QUIState::ui_state.scene.map_on_top ) 
   {
     if (  livetunepanel_left_btn.ptInRect(e->x(), e->y())) 
     {
