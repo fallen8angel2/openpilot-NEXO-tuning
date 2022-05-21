@@ -370,6 +370,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
           Params().put("TorqueFriction", value.toStdString());
         }
      }
+    }
 
 
     if (QUIState::ui_state.scene.started && !sidebar->isVisible() && !QUIState::ui_state.scene.map_on_top && livetunepanel_right_btn.ptInRect(e->x(), e->y())) {
