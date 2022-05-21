@@ -313,7 +313,7 @@ void HomeWindow::mousePressTORQ(QMouseEvent* e, int nDir)
 
 void HomeWindow::mousePressEvent(QMouseEvent* e) 
 {
-  float max_lat_accel = QUIState::ui_state.scene.torqueMaxLatAccel;
+  //float max_lat_accel = QUIState::ui_state.scene.torqueMaxLatAccel;
 
   printf( "mousePressEvent = (%d,%d)\n", e->x(), e->y() );
   // OPKR add map
