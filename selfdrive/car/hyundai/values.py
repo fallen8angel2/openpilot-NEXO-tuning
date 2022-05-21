@@ -4,7 +4,7 @@ from typing import Dict, List, Union
 from cereal import car
 from common.conversions import Conversions as CV
 from selfdrive.car import dbc_dict
-from selfdrive.car.docs_definitions import CarInfo
+from selfdrive.car.docs_definitions import CarInfo, Harness
 from common.params import Params
 Ecu = car.CarParams.Ecu
 
@@ -22,12 +22,6 @@ class CarControllerParams:
     self.STEER_DRIVER_FACTOR = 1
 
 class CAR:
-  # GENESIS
-  GENESIS_DH = "GENESIS (DH)"
-  GENESIS_G70_IK = "GENESIS G70 (IK)"
-  GENESIS_G80_DH = "GENESIS G80 (DH)"
-  GENESIS_G90_HI = "GENESIS G90 (HI)"
-  GENESIS_EQ900_HI = "GENESIS EQ900 (HI)"
   # HYUNDAI
   AVANTE_AD = "HYUNDAI AVANTE (AD)"
   AVANTE_CN7 = "HYUNDAI AVANTE (CN7)"
@@ -53,6 +47,7 @@ class CAR:
   GRANDEUR_HEV_FL_IG = "HYUNDAI GRANDEUR HYBRID FL (IG)"
   TUCSON_TL = "HYUNDAI TUCSON (TL)"
   NEXO_FE = "HYUNDAI NEXO (FE)"
+
   # KIA
   K3_BD = "KIA K3 (BD)"
   K5_JF = "KIA K5 (JF)"
@@ -69,6 +64,12 @@ class CAR:
   SOUL_EV_SK3 = "KIA SOUL EV (SK3)"
   MOHAVE_HM = "KIA MOHAVE (HM)"
 
+  # GENESIS
+  GENESIS_DH = "GENESIS (DH)"
+  GENESIS_G70_IK = "GENESIS G70 (IK)"
+  GENESIS_G80_DH = "GENESIS G80 (DH)"
+  GENESIS_G90_HI = "GENESIS G90 (HI)"
+  GENESIS_EQ900_HI = "GENESIS EQ900 (HI)"
 
 @dataclass
 class HyundaiCarInfo(CarInfo):
@@ -77,13 +78,6 @@ class HyundaiCarInfo(CarInfo):
 
 
 CAR_INFO: Dict[str, Union[HyundaiCarInfo, List[HyundaiCarInfo]]] = {
-  # genesis
-  CAR.GENESIS_DH: HyundaiCarInfo("Genesis 2015-2016"),
-  CAR.GENESIS_G70_IK: HyundaiCarInfo("Genesis G70 2018", "All"),
-  CAR.GENESIS_G80_DH: HyundaiCarInfo("Genesis G80 2017", "All"),
-  CAR.GENESIS_G90_HI: HyundaiCarInfo("Genesis G90 2017", "All"),
-  CAR.GENESIS_EQ900_HI: HyundaiCarInfo("Genesis EQ900", "All"),
-
   # hyundai
   CAR.AVANTE_AD: HyundaiCarInfo("Hyundai Avante", video_link="https://youtu.be/_EdYQtV52-c"),
   CAR.AVANTE_CN7: HyundaiCarInfo("Hyundai Avante 2021", video_link="https://youtu.be/_EdYQtV52-c"),
@@ -106,8 +100,8 @@ CAR_INFO: Dict[str, Union[HyundaiCarInfo, List[HyundaiCarInfo]]] = {
     HyundaiCarInfo("Kia Telluride 2020"),
   ],
   CAR.VELOSTER_JS: HyundaiCarInfo("Hyundai Veloster 2019-20", "All"),
-  CAR.GRANDEUR_IG: HyundaiCarInfo("Hyundai Grandeur IG", "All"),
-  CAR.GRANDEUR_HEV_IG: HyundaiCarInfo("Hyundai Grandeur IG Hybrid", "All"),
+  CAR.GRANDEUR_IG: HyundaiCarInfo("Hyundai Grandeur IG", "All", harness=Harness.hyundai_c),
+  CAR.GRANDEUR_HEV_IG: HyundaiCarInfo("Hyundai Grandeur IG Hybrid", "All", harness=Harness.hyundai_c),
   CAR.GRANDEUR_FL_IG: HyundaiCarInfo("Hyundai Grandeur IG FL", "All"),
   CAR.GRANDEUR_HEV_FL_IG: HyundaiCarInfo("Hyundai Grandeur IG FL Hybrid", "All"),
   CAR.TUCSON_TL: HyundaiCarInfo("Hyundai Tucson", "All"),
@@ -128,6 +122,13 @@ CAR_INFO: Dict[str, Union[HyundaiCarInfo, List[HyundaiCarInfo]]] = {
   CAR.SELTOS_SP2: HyundaiCarInfo("Kia Seltos 2021"),
   CAR.SOUL_EV_SK3: HyundaiCarInfo("Kia Soul EV 2019"),
   CAR.MOHAVE_HM: HyundaiCarInfo("Kia Mohave 2019"),
+
+  # genesis
+  CAR.GENESIS_DH: HyundaiCarInfo("Genesis 2015-2016"),
+  CAR.GENESIS_G70_IK: HyundaiCarInfo("Genesis G70 2018", "All", harness=Harness.hyundai_f),
+  CAR.GENESIS_G80_DH: HyundaiCarInfo("Genesis G80 2017", "All", harness=Harness.hyundai_h),
+  CAR.GENESIS_G90_HI: HyundaiCarInfo("Genesis G90 2017", "All", harness=Harness.hyundai_c),
+  CAR.GENESIS_EQ900_HI: HyundaiCarInfo("Genesis EQ900", "All"),
 }
 
 class Buttons:

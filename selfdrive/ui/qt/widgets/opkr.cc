@@ -3585,8 +3585,8 @@ LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set th
     auto str = QString::fromStdString(params.get("LateralControlMethod"));
     int latcontrol = str.toInt();
     latcontrol = latcontrol - 1;
-    if (latcontrol <= -1) {
-      latcontrol = 3;
+    if (latcontrol < 0) {
+      latcontrol = 4;
     }
     QString latcontrols = QString::number(latcontrol);
     params.put("LateralControlMethod", latcontrols.toStdString());
@@ -3597,7 +3597,7 @@ LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set th
     auto str = QString::fromStdString(params.get("LateralControlMethod"));
     int latcontrol = str.toInt();
     latcontrol = latcontrol + 1;
-    if (latcontrol >= 4) {
+    if (latcontrol > 4) {
       latcontrol = 0;
     }
     QString latcontrols = QString::number(latcontrol);
@@ -3617,7 +3617,9 @@ void LateralControl::refresh() {
     label.setText(QString::fromStdString("LQR"));
   } else if (latcontrol == "3") {
     label.setText(QString::fromStdString("TORQUE"));
-  }
+  } else if (latcontrol == "4") {
+    label.setText(QString::fromStdString("TORQUE+LQR"));
+  }  
 }
 
 PidKp::PidKp() : AbstractControl("Kp", "Adjust Kp", "../assets/offroad/icon_shell.png") {

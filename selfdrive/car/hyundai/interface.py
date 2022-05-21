@@ -54,6 +54,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.minSteerSpeed = 16.67 # m/s
 
+    ret.torqueMaxSpeed = 12.5
+
     # Most Hyundai car ports are community features for now
     ret.pcmCruise = not ret.radarOffCan
 
@@ -106,6 +108,8 @@ class CarInterface(CarInterfaceBase):
       set_lat_tune(ret.lateralTuning, LatTunes.LQR)
     elif lat_control_method == 3:
       set_lat_tune(ret.lateralTuning, LatTunes.TORQUE)
+    elif lat_control_method == 4:
+      set_lat_tune(ret.lateralTuning, LatTunes.ATOM)      
 
     # genesis
     if candidate == CAR.GENESIS_DH:
