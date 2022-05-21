@@ -1665,7 +1665,7 @@ static void ui_draw_live_tune_panel(UIState *s) {
   } 
   else if ( lateralControlMethod == 2) 
   {  
-    } else if (live_tune_panel_list == (s->scene.list_count+0)  ) {
+    if (live_tune_panel_list == (s->scene.list_count+0)  ) {
       sprintf( szTuneParam, "%0.0f", s->scene.lqrScale*1.0);
       szTuneName =  "LQR: Scale";
     } else if (live_tune_panel_list == (s->scene.list_count+1)  ) {
@@ -1676,7 +1676,7 @@ static void ui_draw_live_tune_panel(UIState *s) {
       szTuneName = "LQR: DcGain";
     }
   } 
-  else if ( lateralControlMethod == 3) 
+  else if ( lateralControlMethod == 3 )  
   {  
       float max_lat_accel = s->scene.torqueMaxLatAccel * 0.1;    
       if (live_tune_panel_list == (s->scene.list_count+0)  ) {
