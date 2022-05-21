@@ -1612,7 +1612,7 @@ static void ui_draw_live_tune_panel(UIState *s) {
   //param value
   nvgFontSize(s->vg, 170);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-  float max_lat_accel = s->scene.torqueMaxLatAccel * 0.1;
+
 
   int live_tune_panel_list =  s->scene.live_tune_panel_list;
   int  lateralControlMethod = s->scene.lateralControlMethod;
@@ -1678,6 +1678,7 @@ static void ui_draw_live_tune_panel(UIState *s) {
   } 
   else if ( lateralControlMethod == 3) 
   {  
+      float max_lat_accel = s->scene.torqueMaxLatAccel * 0.1;    
       if (live_tune_panel_list == (s->scene.list_count+0)  ) {
         sprintf( szTuneParam, "%0.1f>%0.2f", s->scene.torqueKp*0.1, (s->scene.torqueKp*0.1)/max_lat_accel);
         szTuneName = "TORQUE: Kp";
