@@ -1394,6 +1394,22 @@ private:
   void refresh();
 };
 
+class TorqueMaxSpeed : public AbstractControl {
+  Q_OBJECT
+
+public:
+  TorqueMaxSpeed();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  double  dTorqueMaxSpeed;
+
+  void refresh();
+};
+
 class Scale : public AbstractControl {
   Q_OBJECT
 

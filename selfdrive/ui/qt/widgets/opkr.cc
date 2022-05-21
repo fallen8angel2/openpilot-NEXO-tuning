@@ -4127,6 +4127,65 @@ void ActuatorEffectiveness::refresh() {
   label.setText(QString::fromStdString(valuefs.toStdString()));
 }
 
+
+TorqueMaxSpeed::TorqueMaxSpeed() : AbstractControl("TorqueMaxSpeed", "Adjust TorqueMaxSpeed", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  btnminus.setText("－");
+  btnplus.setText("＋");
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  auto str = QString::fromStdString(params.get("TorqueMaxSpeed"));
+  dTorqueMaxSpeed = str.toFloat();
+
+  QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
+    dTorqueMaxSpeed -= 0.5;
+    if (dTorqueMaxSpeed <= 20) dTorqueMaxSpeed = 20;
+
+    QString values = QString::number(dTorqueMaxSpeed);
+    params.put("TorqueMaxSpeed", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+    dTorqueMaxSpeed += 0.5;
+    if (dTorqueMaxSpeed <= 20) dTorqueMaxSpeed = 20;
+
+    QString values = QString::number(dTorqueMaxSpeed);
+    params.put("TorqueMaxSpeed", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void TorqueMaxSpeed::refresh() {
+  label.setText(QString::fromStdString(params.get("TorqueMaxSpeed")));
+}
+
+
+
 Scale::Scale() : AbstractControl("Scale", "Adjust Scale", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
