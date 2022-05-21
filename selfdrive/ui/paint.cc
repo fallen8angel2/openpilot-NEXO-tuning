@@ -321,16 +321,22 @@ static void ui_draw_debug(UIState *s) {
     }
     nvgFontSize(s->vg, 50);
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-    if (!scene.animated_rpm) {
-      if (scene.lateralControlMethod == 0) {
-        ui_print(s, ui_viz_rx_center, bdr_s+295, "PID");
-      } else if (scene.lateralControlMethod == 1) {
-        ui_print(s, ui_viz_rx_center, bdr_s+295, "INDI");
-      } else if (scene.lateralControlMethod == 2) {
-        ui_print(s, ui_viz_rx_center, bdr_s+295, "LQR");
-      } else if (scene.lateralControlMethod == 3) {
-        ui_print(s, ui_viz_rx_center, bdr_s+295, "TORQUE");
+
+    char *szLaCMethod = nullptr;
+    if ( !scene.animated_rpm ) 
+    {
+      switch( scene.lateralControlMethod  )
+      {
+        case  0: szLaCMethod = "PID"; break;
+        case  1: szLaCMethod = "INDI"; break;
+        case  2: szLaCMethod = "LQR"; break;
+        case  3: szLaCMethod = "TORQUE"; break;
+        case  4: szLaCMethod = "TORQUE+LQR"; break;
       }
+
+      if( szLaCMethod )
+          ui_print(s, ui_viz_rx_center, bdr_s+295, szLaCMethod );
+
     }
     nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
     if (scene.osm_enabled) {

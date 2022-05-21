@@ -3610,17 +3610,17 @@ LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set th
 void LateralControl::refresh() 
 {
 
-  QString  strLatcontrols;
+  QString  str;
   switch( latcontrol )
   {
-    case 0 : strLatcontrols = "0.PID"; break;
-    case 1 : strLatcontrols = "1.INDI";  break;
-    case 2 : strLatcontrols = "2.LQR";  break;
-    case 3 : strLatcontrols = "3.TORQUE";  break;
-    case 4 : strLatcontrols = "4.TORQUE+LQR";  break;
+    case 0 : str = "0.PID"; break;
+    case 1 : str = "1.INDI";  break;
+    case 2 : str = "2.LQR";  break;
+    case 3 : str = "3.TORQUE";  break;
+    case 4 : str = "4.TORQUE+LQR";  break;
   }
 
-  label.setText( strLatcontrols );
+  label.setText( str );
 }
 
 PidKp::PidKp() : AbstractControl("Kp", "Adjust Kp", "../assets/offroad/icon_shell.png") {
