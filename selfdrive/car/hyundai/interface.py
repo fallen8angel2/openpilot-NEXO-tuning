@@ -2,6 +2,7 @@
 from cereal import car
 from panda import Panda
 from common.conversions import Conversions as CV
+from selfdrive.car.hyundai.tunes import LatTunes, LongTunes, set_long_tune, set_lat_tune
 from selfdrive.car.hyundai.values import CAR, EV_CAR, HYBRID_CAR, Buttons, CarControllerParams
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
@@ -21,7 +22,8 @@ class CarInterface(CarInterfaceBase):
 
     self.blinker_status = 0
     self.blinker_timer = 0
-    self.mad_mode_enabled = Params().get_bool('MadModeEnabled')
+    self.ufc_mode_enabled = Params().get_bool('UFCModeEnabled')
+    self.no_mdps_mods = Params().get_bool('NoSmartMDPS')
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
@@ -49,6 +51,10 @@ class CarInterface(CarInterfaceBase):
     ret.standStill = False
     ret.openpilotLongitudinalControl = Params().get_bool("RadarDisable") or ret.sccBus == 2
     ret.safetyParam = 0
+
+    ret.minSteerSpeed = 16.67 # m/s
+
+    ret.torqueMaxSpeed = 12.5
 
     # Most Hyundai car ports are community features for now
     ret.pcmCruise = not ret.radarOffCan
@@ -86,17 +92,6 @@ class CarInterface(CarInterfaceBase):
     ret.aqValueRaw = 0
 
     params = Params()
-    PidKp = float(Decimal(params.get("PidKp", encoding="utf8")) * Decimal('0.01'))
-    PidKi = float(Decimal(params.get("PidKi", encoding="utf8")) * Decimal('0.001'))
-    PidKd = float(Decimal(params.get("PidKd", encoding="utf8")) * Decimal('0.01'))
-    PidKf = float(Decimal(params.get("PidKf", encoding="utf8")) * Decimal('0.00001'))
-    InnerLoopGain = float(Decimal(params.get("InnerLoopGain", encoding="utf8")) * Decimal('0.1'))
-    OuterLoopGain = float(Decimal(params.get("OuterLoopGain", encoding="utf8")) * Decimal('0.1'))
-    TimeConstant = float(Decimal(params.get("TimeConstant", encoding="utf8")) * Decimal('0.1'))
-    ActuatorEffectiveness = float(Decimal(params.get("ActuatorEffectiveness", encoding="utf8")) * Decimal('0.1'))
-    Scale = float(Decimal(params.get("Scale", encoding="utf8")) * Decimal('1.0'))
-    LqrKi = float(Decimal(params.get("LqrKi", encoding="utf8")) * Decimal('0.001'))
-    DcGain = float(Decimal(params.get("DcGain", encoding="utf8")) * Decimal('0.00001'))
 
     tire_stiffness_factor = float(Decimal(params.get("TireStiffnessFactorAdj", encoding="utf8")) * Decimal('0.01'))
     ret.steerActuatorDelay = float(Decimal(params.get("SteerActuatorDelayAdj", encoding="utf8")) * Decimal('0.01'))
@@ -106,142 +101,146 @@ class CarInterface(CarInterfaceBase):
 
     lat_control_method = int(params.get("LateralControlMethod", encoding="utf8"))
     if lat_control_method == 0:
-      ret.lateralTuning.pid.kf = PidKf
-      ret.lateralTuning.pid.kpBP = [0., 9.]
-      ret.lateralTuning.pid.kpV = [0.1, PidKp]
-      ret.lateralTuning.pid.kiBP = [0., 9.]
-      ret.lateralTuning.pid.kiV = [0.01, PidKi]
-      ret.lateralTuning.pid.kdBP = [0.]
-      ret.lateralTuning.pid.kdV = [PidKd]
+      set_lat_tune(ret.lateralTuning, LatTunes.PID)
     elif lat_control_method == 1:
-      ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGainBP = [0.]
-      ret.lateralTuning.indi.innerLoopGainV = [InnerLoopGain] # third tune. Highest value that still gives smooth control. Effects turning into curves.
-      ret.lateralTuning.indi.outerLoopGainBP = [0.]
-      ret.lateralTuning.indi.outerLoopGainV = [OuterLoopGain] # forth tune. Highest value that still gives smooth control. Effects lane centering.
-      ret.lateralTuning.indi.timeConstantBP = [0.]
-      ret.lateralTuning.indi.timeConstantV = [TimeConstant] # second tune. Lowest value with smooth actuation. Avoid the noise of actuator gears thrashing.
-      ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
-      ret.lateralTuning.indi.actuatorEffectivenessV = [ActuatorEffectiveness] # first tune. Lowest value without oversteering. May vary with speed.
-      # lateralTuning.indi.actuatorEffectiveness
-        # As effectiveness increases, actuation strength decreases
-        # Too high: weak, sloppy lane centering, slow oscillation, can't follow high curvature, high steering error causes snappy corrections
-        # Too low: overpower, saturation, jerky, fast oscillation
-        # Just right: Highest still able to maintain good lane centering.
-      # lateralTuning.indi.timeConstant
-        # Extend exponential decay of prior output steer
-        # Too high: sloppy lane centering
-        # Too low: noisy actuation, responds to every bump, maybe unable to maintain lane center due to rapid actuation
-        # Just right: above noisy actuation and lane centering instability
-      # lateralTuning.indi.innerLoopGain
-        # Steer rate error gain
-        # Too high: jerky oscillation in high curvature
-        # Too low: sloppy, cannot accomplish desired steer angle
-        # Just right: brief snap on entering high curvature
-      # lateralTuning.indi.outerLoopGain
-        # Steer error gain
-        # Too high: twitchy hyper lane centering, oversteering
-        # Too low: sloppy, all over lane
-        # Just right: crisp lane centering
+      set_lat_tune(ret.lateralTuning, LatTunes.INDI)
     elif lat_control_method == 2:
-      ret.lateralTuning.init('lqr')
-      ret.lateralTuning.lqr.scale = Scale
-      ret.lateralTuning.lqr.ki = LqrKi
-      ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
-      ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
-      ret.lateralTuning.lqr.c = [1., 0.]
-      ret.lateralTuning.lqr.k = [-110., 451.]
-      ret.lateralTuning.lqr.l = [0.33, 0.318]
-      ret.lateralTuning.lqr.dcGain = DcGain
+      set_lat_tune(ret.lateralTuning, LatTunes.LQR)
+    elif lat_control_method == 3:
+      set_lat_tune(ret.lateralTuning, LatTunes.TORQUE)
+    elif lat_control_method == 4:
+      set_lat_tune(ret.lateralTuning, LatTunes.ATOM)      
 
     # genesis
-    if candidate == CAR.GENESIS:
-      ret.mass = 1900. + STD_CARGO_KG
+    if candidate == CAR.GENESIS_DH:
+      ret.mass = 1930. + STD_CARGO_KG
       ret.wheelbase = 3.01
-    elif candidate == CAR.GENESIS_G70:
-      ret.mass = 1640. + STD_CARGO_KG
-      ret.wheelbase = 2.84
-    elif candidate == CAR.GENESIS_G80:
+    elif candidate == CAR.GENESIS_G70_IK:
+      ret.mass = 1595. + STD_CARGO_KG
+      ret.wheelbase = 2.835
+    elif candidate == CAR.GENESIS_G80_DH:
       ret.mass = 1855. + STD_CARGO_KG
       ret.wheelbase = 3.01
-    elif candidate == CAR.GENESIS_G90:
-      ret.mass = 2200
-      ret.wheelbase = 3.15
+    elif candidate == CAR.GENESIS_G90_HI:
+      ret.mass = 2120. + STD_CARGO_KG
+      ret.wheelbase = 3.16
+    elif candidate == CAR.GENESIS_EQ900_HI:
+      ret.mass = 2130. + STD_CARGO_KG
+      ret.wheelbase = 3.16
     # hyundai
-    elif candidate == CAR.SANTA_FE:
-      ret.mass = 1694 + STD_CARGO_KG
+    elif candidate == CAR.SANTAFE_TM:
+      ret.mass = 1694. + STD_CARGO_KG
       ret.wheelbase = 2.765
-    elif candidate in (CAR.SONATA, CAR.SONATA_HEV):
-      ret.mass = 1513. + STD_CARGO_KG
+    elif candidate == CAR.SANTAFE_HEV_TM:
+      ret.mass = 1907. + STD_CARGO_KG
+      ret.wheelbase = 2.765
+    elif candidate == CAR.SONATA_DN8:
+      ret.mass = 1465. + STD_CARGO_KG
+      ret.wheelbase = 2.84
+    elif candidate == CAR.SONATA_HEV_DN8:
+      ret.mass = 1505. + STD_CARGO_KG
       ret.wheelbase = 2.84
     elif candidate == CAR.SONATA_LF:
-      ret.mass = 4497. * CV.LB_TO_KG
-      ret.wheelbase = 2.804
-    elif candidate == CAR.SONATA_LF_TURBO:
+      ret.mass = 1465. + STD_CARGO_KG
+      ret.wheelbase = 2.805
+    elif candidate == CAR.SONATA_TURBO_LF:
       ret.mass = 1470. + STD_CARGO_KG
       ret.wheelbase = 2.805
-    elif candidate == CAR.SONATA_LF_HEV:
+    elif candidate == CAR.SONATA_HEV_LF:
       ret.mass = 1595. + STD_CARGO_KG
       ret.wheelbase = 2.805
-    elif candidate == CAR.PALISADE:
-      ret.mass = 1999. + STD_CARGO_KG
+    elif candidate == CAR.PALISADE_LX2:
+      ret.mass = 1885. + STD_CARGO_KG
       ret.wheelbase = 2.90
-    elif candidate == CAR.AVANTE:
-      ret.mass = 1245. + STD_CARGO_KG
+    elif candidate == CAR.AVANTE_AD:
+      ret.mass = 1250. + STD_CARGO_KG
+      ret.wheelbase = 2.7
+    elif candidate == CAR.AVANTE_CN7:
+      ret.mass = 1225. + STD_CARGO_KG
       ret.wheelbase = 2.72
-    elif candidate == CAR.I30:
+    elif candidate == CAR.AVANTE_HEV_CN7:
+      ret.mass = 1335. + STD_CARGO_KG
+      ret.wheelbase = 2.72
+    elif candidate == CAR.I30_PD:
       ret.mass = 1380. + STD_CARGO_KG
       ret.wheelbase = 2.65
-    elif candidate == CAR.KONA:
-      ret.mass = 1275. + STD_CARGO_KG
-      ret.wheelbase = 2.7
-    elif candidate in (CAR.KONA_HEV, CAR.KONA_EV):
-      ret.mass = 1425. + STD_CARGO_KG
+    elif candidate == CAR.KONA_OS:
+      ret.mass = 1325. + STD_CARGO_KG
       ret.wheelbase = 2.6
-    elif candidate in (CAR.IONIQ_HEV, CAR.IONIQ_EV):
-      ret.mass = 1490. + STD_CARGO_KG   #weight per hyundai site https://www.hyundaiusa.com/ioniq-electric/specifications.aspx
+    elif candidate == CAR.KONA_HEV_OS:
+      ret.mass = 1395. + STD_CARGO_KG
+      ret.wheelbase = 2.6
+    elif candidate == CAR.KONA_EV_OS:
+      ret.mass = 1685. + STD_CARGO_KG
+      ret.wheelbase = 2.6
+    elif candidate == CAR.IONIQ_HEV_AE:
+      ret.mass = 1380. + STD_CARGO_KG
       ret.wheelbase = 2.7
-    elif candidate in (CAR.GRANDEUR_IG, CAR.GRANDEUR_IG_HEV):
+    elif candidate == CAR.IONIQ_EV_AE:
+      ret.mass = 1445. + STD_CARGO_KG
+      ret.wheelbase = 2.7
+    elif candidate == CAR.GRANDEUR_IG:
+      ret.mass = 1560. + STD_CARGO_KG
+      ret.wheelbase = 2.845
+    elif candidate == CAR.GRANDEUR_HEV_IG:
       ret.mass = 1675. + STD_CARGO_KG
       ret.wheelbase = 2.845
-    elif candidate in (CAR.GRANDEUR_IG_FL, CAR.GRANDEUR_IG_FL_HEV):
+    elif candidate == CAR.GRANDEUR_FL_IG:
+      ret.mass = 1625. + STD_CARGO_KG
+      ret.wheelbase = 2.885
+    elif candidate == CAR.GRANDEUR_HEV_FL_IG:
       ret.mass = 1675. + STD_CARGO_KG
       ret.wheelbase = 2.885
-    elif candidate == CAR.VELOSTER:
-      ret.mass = 3558. * CV.LB_TO_KG
-      ret.wheelbase = 2.80
-    elif candidate == CAR.NEXO:
+    elif candidate == CAR.VELOSTER_JS:
+      ret.mass = 1285. + STD_CARGO_KG
+      ret.wheelbase = 2.65
+    elif candidate == CAR.TUCSON_TL:
+      ret.mass = 1550. + STD_CARGO_KG
+      ret.wheelbase = 2.67
+    elif candidate == CAR.NEXO_FE:
       ret.mass = 1885. + STD_CARGO_KG
       ret.wheelbase = 2.79
     # kia
-    elif candidate == CAR.SORENTO:
-      ret.mass = 1985. + STD_CARGO_KG
+    elif candidate == CAR.SORENTO_UM:
+      ret.mass = 1910. + STD_CARGO_KG
       ret.wheelbase = 2.78
-    elif candidate in (CAR.K5, CAR.K5_HEV):
+    elif candidate == CAR.K5_JF:
+      ret.wheelbase = 2.805
+      ret.mass = 1475. + STD_CARGO_KG
+    elif candidate == CAR.K5_HEV_JF:
       ret.wheelbase = 2.805
       ret.mass = 1600. + STD_CARGO_KG
-    elif candidate == CAR.STINGER:
-      ret.mass = 1825.0 + STD_CARGO_KG
-      ret.wheelbase = 2.906 # https://www.kia.com/us/en/stinger/specs
-    elif candidate == CAR.K3:
+    elif candidate == CAR.K5_DL3:
+      ret.wheelbase = 2.85
+      ret.mass = 1450. + STD_CARGO_KG
+    elif candidate == CAR.STINGER_CK:
+      ret.mass = 1650. + STD_CARGO_KG
+      ret.wheelbase = 2.905
+    elif candidate == CAR.K3_BD:
       ret.mass = 1260. + STD_CARGO_KG
       ret.wheelbase = 2.70
-    elif candidate == CAR.SPORTAGE:
-      ret.mass = 1985. + STD_CARGO_KG
-      ret.wheelbase = 2.78
-    elif candidate in (CAR.NIRO_HEV, CAR.NIRO_EV):
-      ret.mass = 1737. + STD_CARGO_KG
+    elif candidate == CAR.SPORTAGE_QL:
+      ret.mass = 1510. + STD_CARGO_KG
+      ret.wheelbase = 2.67
+    elif candidate == CAR.NIRO_HEV_DE:
+      ret.mass = 1425. + STD_CARGO_KG
       ret.wheelbase = 2.7
-    elif candidate in (CAR.K7, CAR.K7_HEV):
+    elif candidate == CAR.NIRO_EV_DE:
+      ret.mass = 1755. + STD_CARGO_KG
+      ret.wheelbase = 2.7
+    elif candidate == CAR.K7_YG:
+      ret.mass = 1565. + STD_CARGO_KG
+      ret.wheelbase = 2.855
+    elif candidate == CAR.K7_HEV_YG:
       ret.mass = 1680. + STD_CARGO_KG
       ret.wheelbase = 2.855
-    elif candidate == CAR.SELTOS:
-      ret.mass = 1310. + STD_CARGO_KG
+    elif candidate == CAR.SELTOS_SP2:
+      ret.mass = 1425. + STD_CARGO_KG
+      ret.wheelbase = 2.63
+    elif candidate == CAR.SOUL_EV_SK3:
+      ret.mass = 1695. + STD_CARGO_KG
       ret.wheelbase = 2.6
-    elif candidate == CAR.SOUL_EV:
-      ret.mass = 1375. + STD_CARGO_KG
-      ret.wheelbase = 2.6
-    elif candidate == CAR.MOHAVE:
+    elif candidate == CAR.MOHAVE_HM:
       ret.mass = 2285. + STD_CARGO_KG
       ret.wheelbase = 2.895
 
@@ -268,7 +267,7 @@ class CarInterface(CarInterfaceBase):
     #  ret.safetyParam |= Panda.FLAG_HYUNDAI_LONG
 
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
-    if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or params.get_bool("MadModeEnabled"):
+    if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or params.get_bool("UFCModeEnabled"):
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
     return ret
 
@@ -296,15 +295,8 @@ class CarInterface(CarInterfaceBase):
       self.CP.pcmCruise = True
 
     # most HKG cars has no long control, it is safer and easier to engage by main on
-    if self.mad_mode_enabled:
+    if self.ufc_mode_enabled:
       ret.cruiseState.enabled = ret.cruiseState.available
-
-
-    # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
-    if ret.vEgo < (self.CP.minSteerSpeed + 0.2) and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
-    if ret.vEgo > (self.CP.minSteerSpeed + 0.7):
-      self.low_speed_alert = False
 
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
@@ -335,10 +327,10 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.brakeUnavailable)
     #if abs(ret.steeringAngle) > 90. and EventName.steerTempUnavailable not in events.events:
     #  events.add(EventName.steerTempUnavailable)
-    # if self.low_speed_alert:
-    #   events.add(EventName.belowSteerSpeed)
-    # if self.mad_mode_enabled and EventName.pedalPressed in events.events:
+    # if self.ufc_mode_enabled and EventName.pedalPressed in events.events:
     #   events.events.remove(EventName.pedalPressed)
+    if ret.vEgo < self.CP.minSteerSpeed and self.no_mdps_mods:
+      events.add(car.CarEvent.EventName.belowSteerSpeed)
     if self.CC.lanechange_manual_timer and ret.vEgo > 0.3:
       events.add(EventName.laneChangeManual)
     if self.CC.emergency_manual_timer:

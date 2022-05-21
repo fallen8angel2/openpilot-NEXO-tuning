@@ -235,6 +235,7 @@ struct CarState {
   isMph @53 :Bool;
   aReqValue @54 :Float32;
   engineRpm @55 :Float32;
+  chargeMeter @56 :Float32;
 
   struct TPMS {
     unit @0 :Int8;
@@ -487,6 +488,7 @@ struct CarParams {
     indi @27 :LateralINDITuning;
     lqr @40 :LateralLQRTuning;
     torque @66 :LateralTorqueTuning;
+    atom @82 :LateralATOMTuning;
   }
 
   steerLimitAlert @28 :Bool;
@@ -532,10 +534,16 @@ struct CarParams {
   vFuture @79: Float32;
   aqValue @80: Float32;
   aqValueRaw @81: Float32;
+  torqueMaxSpeed @82: Float32;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
     torqueV @1 :List(Int32);
+  }
+
+  struct LateralATOMTuning {
+    lqr @0 :LateralLQRTuning;
+    torque @1 :LateralTorqueTuning;
   }
 
   struct LateralPIDTuning {
@@ -561,12 +569,13 @@ struct CarParams {
     kpV @1 :List(Float32);
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
+    kf @6 :Float32;
     deadzoneBP @4 :List(Float32);
     deadzoneV @5 :List(Float32);
-    kdBP @6 :List(Float32) = [0.];
-    kdV @7 :List(Float32) = [0.];
-    kfBP @8 :List(Float32);
-    kfV @9 :List(Float32);
+    kdBP @7 :List(Float32) = [0.];
+    kdV @8 :List(Float32) = [0.];
+    kfBP @9 :List(Float32);
+    kfV @10 :List(Float32);
   }
 
   struct LateralINDITuning {

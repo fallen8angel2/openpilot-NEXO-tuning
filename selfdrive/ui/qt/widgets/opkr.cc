@@ -20,7 +20,6 @@
 #include "selfdrive/ui/ui.h"
 
 SwitchOpenpilot::SwitchOpenpilot() : ButtonControl("Change Repo/Branch", "", "Change to another open pilot code. You can change it by entering ID/repository/branch.") {
-
   QObject::connect(this, &ButtonControl::clicked, [=]() {
     if (text() == "CHANGE") {
       QString userid = InputDialog::getText("First: Input the Git ID.", this);
@@ -41,15 +40,18 @@ SwitchOpenpilot::SwitchOpenpilot() : ButtonControl("Change Repo/Branch", "", "Ch
               QDateTime a = QDateTime::currentDateTime();
               QString as = a.toString(time_format);
               QString cmd1 = "mv /data/openpilot /data/openpilot_" + as;
-              QString cmd2 = "git clone -b " + githubbranch + " --single-branch https://github.com/" + githubid + "/" + githubrepo + ".git /data/openpilot";
+              QString tcmd = "git clone -b " + githubbranch + " --single-branch https://github.com/" + githubid + "/" + githubrepo + ".git /data/openpilot";
+              QString cmd3 = "rm -f /data/openpilot_" + as + "/prebuilt";
               QProcess::execute("pkill -f thermald");
               QProcess::execute(cmd1);
-              QProcess::execute(cmd2);
-              QProcess::execute("chmod -R g-rwx /data/openpilot");
-              QProcess::execute("chmod -R o-rwx /data/openpilot");
-              QProcess::execute("chmod 755 /data/openpilot");
-              QProcess::execute("chmod 755 /data/openpilot/cereal");
-              QProcess::execute("reboot");
+              QProcess::execute(cmd3);
+              textMsgProcess = new QProcess(this);
+              outbox = new QMessageBox(this);
+              outbox->setStyleSheet("QLabel{min-width:800px; font-size: 50px;}");
+              QObject::connect(textMsgProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(printMsg()));
+              QObject::connect(textMsgProcess, SIGNAL(readyReadStandardError()), this, SLOT(printMsg()));
+              QObject::connect(textMsgProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
+              executeProgram(tcmd);
             }
           }
         }
@@ -59,6 +61,34 @@ SwitchOpenpilot::SwitchOpenpilot() : ButtonControl("Change Repo/Branch", "", "Ch
     }
   });
   refresh();
+}
+
+void SwitchOpenpilot::printMsg() {
+  QByteArray datao;
+  QByteArray datae;
+  datao = textMsgProcess->readAllStandardOutput();
+  datae = textMsgProcess->readAllStandardError();
+  QString texto = QString::fromLocal8Bit(datao);
+  QString texte = QString::fromLocal8Bit(datae);
+  outdata = texto+texte;
+  outbox->setText(outdata);
+  outbox->show();
+}
+
+void SwitchOpenpilot::executeProgram(const QString &tcmd) {
+  QString program = QString(tcmd);
+  textMsgProcess->start(program);
+  textMsgProcess->waitForStarted();
+}
+
+void SwitchOpenpilot::processFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+  if(exitStatus == QProcess::NormalExit) {
+    QProcess::execute("chmod -R g-rwx /data/openpilot");
+    QProcess::execute("chmod -R o-rwx /data/openpilot");
+    QProcess::execute("chmod 755 /data/openpilot");
+    QProcess::execute("chmod 755 /data/openpilot/cereal");
+    QProcess::execute("reboot");
+  }
 }
 
 void SwitchOpenpilot::refresh() {
@@ -1011,7 +1041,7 @@ void ChargingMax::refresh() {
   label.setText(QString::fromStdString(params.get("OpkrBatteryChargingMax")));
 }
 
-RecordCount::RecordCount() : AbstractControl("Number of Recorded Files", "Sets the maximum number of recording files.", "../assets/offroad/icon_shell.png") {
+RecordCount::RecordCount() : AbstractControl("Number of Recorded Files", "Sets the maximum number of recording files. Check file size and max recording count to not exceed your storage.", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
   label.setStyleSheet("color: #e0e879");
@@ -1043,9 +1073,9 @@ RecordCount::RecordCount() : AbstractControl("Number of Recorded Files", "Sets t
   QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
     auto str = QString::fromStdString(params.get("RecordingCount"));
     int value = str.toInt();
-    value = value - 5;
-    if (value <= 5) {
-      value = 5;
+    value = value - 10;
+    if (value <= 10) {
+      value = 10;
     }
     QString values = QString::number(value);
     params.put("RecordingCount", values.toStdString());
@@ -1055,9 +1085,9 @@ RecordCount::RecordCount() : AbstractControl("Number of Recorded Files", "Sets t
   QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
     auto str = QString::fromStdString(params.get("RecordingCount"));
     int value = str.toInt();
-    value = value + 5;
-    if (value >= 300) {
-      value = 300;
+    value = value + 10;
+    if (value >= 1000) {
+      value = 1000;
     }
     QString values = QString::number(value);
     params.put("RecordingCount", values.toStdString());
@@ -2130,7 +2160,7 @@ void AutoResLimitTime::refresh() {
   btnplus.setText("+");
 }
 
-AutoEnableSpeed::AutoEnableSpeed() : AbstractControl("Auto Engage Speed(km/h)", "Set the automatic engage speed.", "../assets/offroad/icon_shell.png") {
+AutoEnableSpeed::AutoEnableSpeed() : AbstractControl("Auto Engage Spd(kph)", "Set the automatic engage speed.", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
   label.setStyleSheet("color: #e0e879");
@@ -2161,8 +2191,8 @@ AutoEnableSpeed::AutoEnableSpeed() : AbstractControl("Auto Engage Speed(km/h)", 
     auto str = QString::fromStdString(params.get("AutoEnableSpeed"));
     int value = str.toInt();
     value = value - 3;
-    if (value <= 0) {
-      value = 0;
+    if (value <= -3) {
+      value = -3;
     }
     QString values = QString::number(value);
     params.put("AutoEnableSpeed", values.toStdString());
@@ -2185,7 +2215,9 @@ AutoEnableSpeed::AutoEnableSpeed() : AbstractControl("Auto Engage Speed(km/h)", 
 
 void AutoEnableSpeed::refresh() {
   QString option = QString::fromStdString(params.get("AutoEnableSpeed"));
-  if (option == "0") {
+  if (option == "-3") {
+    label.setText(QString::fromStdString("atDGear"));
+  } else if (option == "0") {
     label.setText(QString::fromStdString("atDepart"));
   } else {
     label.setText(QString::fromStdString(params.get("AutoEnableSpeed")));
@@ -3520,7 +3552,7 @@ void SteerThreshold::refresh() {
 }
 
 //제어
-LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set the steering control method(PID/INDI/LQR/ANGLE/TORQUE). Reboot Required.", "../assets/offroad/icon_shell.png") {
+LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set the steering control method(PID/INDI/LQR/TORQUE). Reboot Required.", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
   label.setStyleSheet("color: #e0e879");
@@ -3553,7 +3585,7 @@ LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set th
     auto str = QString::fromStdString(params.get("LateralControlMethod"));
     int latcontrol = str.toInt();
     latcontrol = latcontrol - 1;
-    if (latcontrol <= -1) {
+    if (latcontrol < 0) {
       latcontrol = 4;
     }
     QString latcontrols = QString::number(latcontrol);
@@ -3565,7 +3597,7 @@ LateralControl::LateralControl() : AbstractControl("LatControl(Reboot)", "Set th
     auto str = QString::fromStdString(params.get("LateralControlMethod"));
     int latcontrol = str.toInt();
     latcontrol = latcontrol + 1;
-    if (latcontrol >= 5) {
+    if (latcontrol > 4) {
       latcontrol = 0;
     }
     QString latcontrols = QString::number(latcontrol);
@@ -3584,10 +3616,10 @@ void LateralControl::refresh() {
   } else if (latcontrol == "2") {
     label.setText(QString::fromStdString("LQR"));
   } else if (latcontrol == "3") {
-    label.setText(QString::fromStdString("ANGLE"));
-  } else if (latcontrol == "4") {
     label.setText(QString::fromStdString("TORQUE"));
-  }
+  } else if (latcontrol == "4") {
+    label.setText(QString::fromStdString("TORQUE+LQR"));
+  }  
 }
 
 PidKp::PidKp() : AbstractControl("Kp", "Adjust Kp", "../assets/offroad/icon_shell.png") {
@@ -4279,6 +4311,336 @@ void DcGain::refresh() {
   label.setText(QString::fromStdString(valuefs.toStdString()));
 }
 
+TorqueKp::TorqueKp() : AbstractControl("Kp", "Adjust Kp", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  btnminus.setText("－");
+  btnplus.setText("＋");
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueKp"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 1) {
+      value = 1;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueKp", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueKp"));
+    auto str1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+    int value = str.toInt();
+    int max_lat_accel = str1.toInt();
+    value = value + 1;
+    if (value >= max_lat_accel) {
+      value = max_lat_accel;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueKp", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void TorqueKp::refresh() {
+  auto strs = QString::fromStdString(params.get("TorqueKp"));
+  auto strs1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+  float max_lat_accel = strs1.toInt() * 0.1;
+  int valuei = strs.toInt();
+  float valuef = valuei * 0.1;
+  float valuef1 = valuef/max_lat_accel;
+  QString valuefs = QString::number(valuef) + "/" + QString::number(max_lat_accel) + "= " + QString::number(valuef1);
+  label.setText(QString::fromStdString(valuefs.toStdString()));
+}
+
+TorqueKf::TorqueKf() : AbstractControl("Kf", "Adjust Kf", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  btnminus.setText("－");
+  btnplus.setText("＋");
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueKf"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 1) {
+      value = 1;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueKf", values.toStdString());
+    refresh();
+  });
+  
+ QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueKf"));
+    auto str1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+    int value = str.toInt();
+    int max_lat_accel = str1.toInt();
+    value = value + 1;
+    if (value >= max_lat_accel) {
+      value = max_lat_accel;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueKf", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void TorqueKf::refresh() {
+  auto strs = QString::fromStdString(params.get("TorqueKf"));
+  auto strs1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+  float max_lat_accel = strs1.toInt() * 0.1;
+  int valuei = strs.toInt();
+  float valuef = valuei * 0.1;
+  float valuef1 = valuef/max_lat_accel;
+  QString valuefs = QString::number(valuef) + "/" + QString::number(max_lat_accel) + "= " + QString::number(valuef1);
+  label.setText(QString::fromStdString(valuefs.toStdString()));
+}
+
+TorqueKi::TorqueKi() : AbstractControl("Ki", "Adjust Ki", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  btnminus.setText("－");
+  btnplus.setText("＋");
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueKi"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 1) {
+      value = 1;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueKi", values.toStdString());
+    refresh();
+  });
+  
+ QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueKi"));
+    auto str1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+    int value = str.toInt();
+    int max_lat_accel = str1.toInt();
+    value = value + 1;
+    if (value >= max_lat_accel) {
+      value = max_lat_accel;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueKi", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void TorqueKi::refresh() {
+  auto strs = QString::fromStdString(params.get("TorqueKi"));
+  auto strs1 = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+  float max_lat_accel = strs1.toInt() * 0.1;
+  int valuei = strs.toInt();
+  float valuef = valuei * 0.1;
+  float valuef1 = valuef/max_lat_accel;
+  QString valuefs = QString::number(valuef) + "/" + QString::number(max_lat_accel) + "= " + QString::number(valuef1);
+  label.setText(QString::fromStdString(valuefs.toStdString()));
+}
+
+TorqueFriction::TorqueFriction() : AbstractControl("Friction", "Adjust Friction", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  btnminus.setText("－");
+  btnplus.setText("＋");
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueFriction"));
+    int value = str.toInt();
+    value = value - 5;
+    if (value <= 0) {
+      value = 0;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueFriction", values.toStdString());
+    refresh();
+  });
+  
+ QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueFriction"));
+    int value = str.toInt();
+    value = value + 5;
+    if (value >= 300) {
+      value = 300;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueFriction", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void TorqueFriction::refresh() {
+  auto strs = QString::fromStdString(params.get("TorqueFriction"));
+  int valuei = strs.toInt();
+  float valuef = valuei * 0.001;
+  QString valuefs = QString::number(valuef);
+  label.setText(QString::fromStdString(valuefs.toStdString()));
+}
+
+TorqueMaxLatAccel::TorqueMaxLatAccel() : AbstractControl("MaxLatAccel", "Adjust MaxLatAccel", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  btnminus.setText("－");
+  btnplus.setText("＋");
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+    int value = str.toInt();
+    value = value - 1;
+    if (value <= 1) {
+      value = 1;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueMaxLatAccel", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+    int value = str.toInt();
+    value = value + 1;
+    if (value >= 50) {
+      value = 50;
+    }
+    QString values = QString::number(value);
+    params.put("TorqueMaxLatAccel", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void TorqueMaxLatAccel::refresh() {
+  auto strs = QString::fromStdString(params.get("TorqueMaxLatAccel"));
+  int valuei = strs.toInt();
+  float valuef = valuei * 0.1;
+  QString valuefs = QString::number(valuef);
+  label.setText(QString::fromStdString(valuefs.toStdString()));
+}
+
 CruiseGapTR::CruiseGapTR() : AbstractControl("CruiseGap", "Adjust the inter-vehicle distance (TR) according to the cruise gap. TR refers to the time in seconds of collision with the car in front, and the larger it becomes, the farther it is from the car in front.", "") {
   QString dtr = QString::fromStdString(params.get("DynamicTRGap"));
   if (dtr == "0") {
@@ -4943,7 +5305,7 @@ VCurvSpeed::VCurvSpeed() : AbstractControl("", "", "") {
   QObject::connect(&btn, &QPushButton::clicked, [=]() {
     int list_count1 = 0;
     int list_count2 = 0;
-    QString targetvalue1 = InputDialog::getText("Set CV values with comma", this, "ex) 30,50,70,90,110", false, 1, QString::fromStdString(params.get("VCurvSpeedC")));
+    QString targetvalue1 = InputDialog::getText("Set CV values with comma", this, "Values are kph or mph", false, 1, QString::fromStdString(params.get("VCurvSpeedC")));
     if (targetvalue1.length() > 0 && targetvalue1 != QString::fromStdString(params.get("VCurvSpeedC"))) {
       QStringList list1 = targetvalue1.split(",");
       list_count1 = list1.size();
@@ -4953,7 +5315,7 @@ VCurvSpeed::VCurvSpeed() : AbstractControl("", "", "") {
       QStringList list1 = QString::fromStdString(params.get("VCurvSpeedC")).split(",");
       list_count1 = list1.size();
     }
-    QString targetvalue2 = InputDialog::getText("Set TS values with comma", this, "ex) 45,55,65,75,85", false, 1, QString::fromStdString(params.get("VCurvSpeedT")));
+    QString targetvalue2 = InputDialog::getText("Set TS values with comma", this, "CV: " + QString::fromStdString(params.get("VCurvSpeedC")), false, 1, QString::fromStdString(params.get("VCurvSpeedT")));
     if (targetvalue2.length() > 0 && targetvalue2 != QString::fromStdString(params.get("VCurvSpeedT"))) {
       QStringList list2 = targetvalue2.split(",");
       list_count2 = list2.size();
@@ -5013,7 +5375,7 @@ OCurvSpeed::OCurvSpeed() : AbstractControl("", "", "") {
   QObject::connect(&btn, &QPushButton::clicked, [=]() {
     int list_count1 = 0;
     int list_count2 = 0;
-    QString targetvalue1 = InputDialog::getText("Set TSL values with comma", this, "ex) 30,40,50,60,70", false, 1, QString::fromStdString(params.get("OCurvSpeedC")));
+    QString targetvalue1 = InputDialog::getText("Set TSL values with comma", this, "Valus are TSL", false, 1, QString::fromStdString(params.get("OCurvSpeedC")));
     if (targetvalue1.length() > 0 && targetvalue1 != QString::fromStdString(params.get("OCurvSpeedC"))) {
       QStringList list1 = targetvalue1.split(",");
       list_count1 = list1.size();
@@ -5023,7 +5385,7 @@ OCurvSpeed::OCurvSpeed() : AbstractControl("", "", "") {
       QStringList list1 = QString::fromStdString(params.get("OCurvSpeedC")).split(",");
       list_count1 = list1.size();
     }
-    QString targetvalue2 = InputDialog::getText("Set TS values with comma", this, "ex) 35,45,60,70,80", false, 1, QString::fromStdString(params.get("OCurvSpeedT")));
+    QString targetvalue2 = InputDialog::getText("Set TS values with comma", this, "TSL: " + QString::fromStdString(params.get("OCurvSpeedC")), false, 1, QString::fromStdString(params.get("OCurvSpeedT")));
     if (targetvalue2.length() > 0 && targetvalue2 != QString::fromStdString(params.get("OCurvSpeedT"))) {
       QStringList list2 = targetvalue2.split(",");
       list_count2 = list2.size();
@@ -5798,8 +6160,8 @@ AutoRESDelay::AutoRESDelay() : AbstractControl("AutoRES Delay(sec)", "Give delay
     auto str = QString::fromStdString(params.get("AutoRESDelay"));
     int value = str.toInt();
     value = value + 1;
-    if (value >= 10) {
-      value = 10;
+    if (value >= 20) {
+      value = 20;
     }
     QString values = QString::number(value);
     params.put("AutoRESDelay", values.toStdString());
@@ -5854,7 +6216,7 @@ OSMCustomSpeedLimit::OSMCustomSpeedLimit() : AbstractControl("", "", "") {
   QObject::connect(&btn, &QPushButton::clicked, [=]() {
     int list_count1 = 0;
     int list_count2 = 0;
-    QString targetvalue1 = InputDialog::getText("Set SL values with comma", this, "ex) 30,40,50,60,70,90", false, 1, QString::fromStdString(params.get("OSMCustomSpeedLimitC")));
+    QString targetvalue1 = InputDialog::getText("Set SL values with comma", this, "Values are kph or mph", false, 1, QString::fromStdString(params.get("OSMCustomSpeedLimitC")));
     if (targetvalue1.length() > 0 && targetvalue1 != QString::fromStdString(params.get("OSMCustomSpeedLimitC"))) {
       QStringList list1 = targetvalue1.split(",");
       list_count1 = list1.size();
@@ -5864,7 +6226,7 @@ OSMCustomSpeedLimit::OSMCustomSpeedLimit() : AbstractControl("", "", "") {
       QStringList list1 = QString::fromStdString(params.get("OSMCustomSpeedLimitC")).split(",");
       list_count1 = list1.size();
     }
-    QString targetvalue2 = InputDialog::getText("Set CTSL values with comma", this, "ex) 30,40,65,72,80,95", false, 1, QString::fromStdString(params.get("OSMCustomSpeedLimitT")));
+    QString targetvalue2 = InputDialog::getText("Set CTSL values with comma", this, "SL: " + QString::fromStdString(params.get("OSMCustomSpeedLimitC")), false, 1, QString::fromStdString(params.get("OSMCustomSpeedLimitT")));
     if (targetvalue2.length() > 0 && targetvalue2 != QString::fromStdString(params.get("OSMCustomSpeedLimitT"))) {
       QStringList list2 = targetvalue2.split(",");
       list_count2 = list2.size();
@@ -6022,7 +6384,7 @@ DynamicTRBySpeed::DynamicTRBySpeed() : AbstractControl("", "", "") {
   QObject::connect(&btn, &QPushButton::clicked, [=]() {
     int list_count1 = 0;
     int list_count2 = 0;
-    QString targetvalue1 = InputDialog::getText("Set Speed values with comma", this, "ex) 0,20,40,60,110", false, 1, QString::fromStdString(params.get("DynamicTRSpd")));
+    QString targetvalue1 = InputDialog::getText("Set Speed values with comma", this, "Values are kph or mph", false, 1, QString::fromStdString(params.get("DynamicTRSpd")));
     if (targetvalue1.length() > 0 && targetvalue1 != QString::fromStdString(params.get("DynamicTRSpd"))) {
       QStringList list1 = targetvalue1.split(",");
       list_count1 = list1.size();
@@ -6032,7 +6394,7 @@ DynamicTRBySpeed::DynamicTRBySpeed() : AbstractControl("", "", "") {
       QStringList list1 = QString::fromStdString(params.get("DynamicTRSpd")).split(",");
       list_count1 = list1.size();
     }
-    QString targetvalue2 = InputDialog::getText("Set TR values with comma", this, "ex) 1.2,1.3,1.4,1.5,1.6", false, 1, QString::fromStdString(params.get("DynamicTRSet")));
+    QString targetvalue2 = InputDialog::getText("Set TR values with comma", this, "SPD: " + QString::fromStdString(params.get("DynamicTRSpd")), false, 1, QString::fromStdString(params.get("DynamicTRSet")));
     if (targetvalue2.length() > 0 && targetvalue2 != QString::fromStdString(params.get("DynamicTRSet"))) {
       QStringList list2 = targetvalue2.split(",");
       list_count2 = list2.size();
@@ -6155,7 +6517,7 @@ SpeedLaneWidth::SpeedLaneWidth() : AbstractControl("", "", "") {
   QObject::connect(&btn, &QPushButton::clicked, [=]() {
     int list_count1 = 0;
     int list_count2 = 0;
-    QString targetvalue1 = InputDialog::getText("Set Speed(m/s) values with comma", this, "ex) 0,31", false, 1, QString::fromStdString(params.get("SpdLaneWidthSpd")));
+    QString targetvalue1 = InputDialog::getText("Set Speed(m/s) values with comma", this, "Values are m/s unit.", false, 1, QString::fromStdString(params.get("SpdLaneWidthSpd")));
     if (targetvalue1.length() > 0 && targetvalue1 != QString::fromStdString(params.get("SpdLaneWidthSpd"))) {
       QStringList list1 = targetvalue1.split(",");
       list_count1 = list1.size();
@@ -6165,7 +6527,7 @@ SpeedLaneWidth::SpeedLaneWidth() : AbstractControl("", "", "") {
       QStringList list1 = QString::fromStdString(params.get("SpdLaneWidthSpd")).split(",");
       list_count1 = list1.size();
     }
-    QString targetvalue2 = InputDialog::getText("Set LW(m) values with comma", this, "ex) 2.8,3.5", false, 1, QString::fromStdString(params.get("SpdLaneWidthSet")));
+    QString targetvalue2 = InputDialog::getText("Set LW(m) values with comma", this, "SPD: " + QString::fromStdString(params.get("SpdLaneWidthSpd")), false, 1, QString::fromStdString(params.get("SpdLaneWidthSet")));
     if (targetvalue2.length() > 0 && targetvalue2 != QString::fromStdString(params.get("SpdLaneWidthSet"))) {
       QStringList list2 = targetvalue2.split(",");
       list_count2 = list2.size();
@@ -6597,4 +6959,100 @@ void RoutineDriveOption::refresh() {
     background-color: #393939;
     )");
   }
+}
+
+RPMAnimatedMaxValue::RPMAnimatedMaxValue() : AbstractControl("AnimatedRPM Max", "Set Max RPM for animated rpm value.", "../assets/offroad/icon_shell.png") {
+
+  label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+  label.setStyleSheet("color: #e0e879");
+  hlayout->addWidget(&label);
+
+  btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  btnminus.setFixedSize(150, 100);
+  btnplus.setFixedSize(150, 100);
+  btnminus.setText("－");
+  btnplus.setText("＋");
+  hlayout->addWidget(&btnminus);
+  hlayout->addWidget(&btnplus);
+
+  QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("AnimatedRPMMax"));
+    int value = str.toInt();
+    value = value - 100;
+    if (value <= 500) {
+      value = 500;
+    }
+    QString values = QString::number(value);
+    params.put("AnimatedRPMMax", values.toStdString());
+    refresh();
+  });
+  
+  QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
+    auto str = QString::fromStdString(params.get("AnimatedRPMMax"));
+    int value = str.toInt();
+    value = value + 100;
+    if (value >= 6500) {
+      value = 6500;
+    }
+    QString values = QString::number(value);
+    params.put("AnimatedRPMMax", values.toStdString());
+    refresh();
+  });
+  refresh();
+}
+
+void RPMAnimatedMaxValue::refresh() {
+  label.setText(QString::fromStdString(params.get("AnimatedRPMMax")));
+}
+
+UserSpecificFeature::UserSpecificFeature() : AbstractControl("FeatureNumber", "User Specific Feature", "") {
+  btn.setStyleSheet(R"(
+    padding: -10;
+    border-radius: 35px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+  edit.setStyleSheet(R"(
+    background-color: grey;
+    font-size: 55px;
+    font-weight: 500;
+    height: 120px;
+  )");
+  btn.setFixedSize(150, 100);
+  edit.setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+
+  hlayout->addWidget(&edit);
+  hlayout->addWidget(&btn);
+
+  QObject::connect(&btn, &QPushButton::clicked, [=]() {
+    QString targetvalue = InputDialog::getText("User Specific Features", this, "Put your number you know.", false, 1, QString::fromStdString(params.get("UserSpecificFeature")));
+    if (targetvalue.length() > 0 && targetvalue != QString::fromStdString(params.get("UserSpecificFeature"))) {
+      params.put("UserSpecificFeature", targetvalue.toStdString());
+      refresh();
+    }
+   });
+  refresh();
+}
+
+void UserSpecificFeature::refresh() {
+  auto strs = QString::fromStdString(params.get("UserSpecificFeature"));
+  edit.setText(QString::fromStdString(strs.toStdString()));
+  btn.setText("SET");
 }

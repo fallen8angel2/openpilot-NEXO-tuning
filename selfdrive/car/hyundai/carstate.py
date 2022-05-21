@@ -4,7 +4,7 @@ import cereal.messaging as messaging
 from common.conversions import Conversions as CV
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, EV_CAR, HYBRID_CAR, Buttons
+from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, EV_CAR, HYBRID_CAR, Buttons, CAR
 from selfdrive.car.interfaces import CarStateBase
 from common.numpy_fast import interp
 from common.params import Params
@@ -259,7 +259,7 @@ class CarState(CarStateBase):
         ret.engineRpm = cp.vl["E_EMS11"]["N"] # opkr
       else:
         ret.gas = cp.vl["E_EMS11"]["Accel_Pedal_Pos"] / 254.
-        ret.engineRpm = 9999
+        ret.engineRpm = cp.vl["ELECT_GEAR"]["Elect_Motor_Speed"] * 30 # opkr, may multiply deceleration ratio in line with engine rpm
       ret.gasPressed = ret.gas > 0
     else:
       ret.gas = cp.vl["EMS12"]["PV_AV_CAN"] / 100.
@@ -323,6 +323,7 @@ class CarState(CarStateBase):
     ret.safetyDist = self.safety_dist
     self.cruiseGapSet = cp_scc.vl["SCC11"]["TauGapSet"]
     ret.cruiseGapSet = self.cruiseGapSet
+    ret.chargeMeter = cp.vl["EV_PC6"]["CF_Vcu_ChargeMeter"] # opkr
 
     # Gear Selection via Cluster - For those Kia/Hyundai which are not fully discovered, we can use the Cluster Indicator for Gear Selection,
     # as this seems to be standard over all cars, but is not the preferred method.
@@ -333,7 +334,10 @@ class CarState(CarStateBase):
       gear = cp.vl["TCU12"]["CUR_GR"]
       ret.gearStep = 0
     elif self.CP.carFingerprint in FEATURES["use_elect_gears"]:
-      gear = cp.vl["ELECT_GEAR"]["Elect_Gear_Shifter"]
+      if self.CP.carFingerprint == CAR.NEXO_FE:
+        gear = cp.vl["ELECT_GEAR"]["Elect_Gear_Shifter_NEXO"] # NEXO's gear info from neokii. If someone can send me a cabana, I will find more clear info.
+      else:
+        gear = cp.vl["ELECT_GEAR"]["Elect_Gear_Shifter"]
       ret.gearStep = cp.vl["ELECT_GEAR"]["Elect_Gear_Step"] # opkr
     else:
       gear = cp.vl["LVR12"]["CF_Lvr_Gear"]
@@ -508,6 +512,8 @@ class CarState(CarStateBase):
       ("OPKR_SBR_LSpd", "NAVI"),
 
       ("N", "EMS_366"),
+
+      ("CF_Vcu_ChargeMeter", "EV_PC6"),
     ]
 
     checks = [
@@ -608,7 +614,8 @@ class CarState(CarStateBase):
     elif CP.carFingerprint in FEATURES["use_elect_gears"]:
       signals += [
         ("Elect_Gear_Shifter", "ELECT_GEAR"),
-        ("Elect_Gear_Step", "ELECT_GEAR")
+        ("Elect_Gear_Step", "ELECT_GEAR"),
+        ("Elect_Motor_Speed", "ELECT_GEAR")
       ]
       checks += [("ELECT_GEAR", 20)]
     else:

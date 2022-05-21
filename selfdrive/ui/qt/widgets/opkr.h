@@ -9,12 +9,19 @@
 #include "selfdrive/ui/ui.h"
 #include <QComboBox>
 #include <QAbstractItemView>
+#include <QMessageBox>
+#include <QProcess>
 
 class SwitchOpenpilot : public ButtonControl {
   Q_OBJECT
 
 public:
   SwitchOpenpilot();
+  void executeProgram(const QString &tcmd);
+
+private slots:
+  void printMsg();
+  void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
   Params params;
@@ -22,6 +29,10 @@ private:
   QString githubid;
   QString githubrepo;
   QString githubbranch;
+
+  QProcess *textMsgProcess;
+  QMessageBox *outbox;
+  QString outdata;
 
   void refresh();
   void getUserID(const QString &userid);
@@ -130,14 +141,14 @@ public:
   }
 };
 
-class MadModeEnabledToggle : public ToggleControl {
+class UFCModeEnabledToggle : public ToggleControl {
   Q_OBJECT
 
 public:
-  MadModeEnabledToggle() : ToggleControl("MainSwitch Openpilot ON/OFF", "Activate the open pilot using the cruise Main Switch.", "../assets/offroad/icon_shell.png", Params().getBool("MadModeEnabled")) {
-    QObject::connect(this, &MadModeEnabledToggle::toggleFlipped, [=](int state) {
+  UFCModeEnabledToggle() : ToggleControl("User-Friendly Control(UFC) Mode", "OP activates with Main Cruise Switch, AutoRES while driving, Seperate Lat/Long and etc", "../assets/offroad/icon_shell.png", Params().getBool("UFCModeEnabled")) {
+    QObject::connect(this, &UFCModeEnabledToggle::toggleFlipped, [=](int state) {
       bool status = state ? true : false;
-      Params().putBool("MadModeEnabled", status);
+      Params().putBool("UFCModeEnabled", status);
     });
   }
 };
@@ -722,6 +733,18 @@ public:
     QObject::connect(this, &ShowStopLineToggle::toggleFlipped, [=](int state) {
       bool status = state ? true : false;
       Params().putBool("ShowStopLine", status);
+    });
+  }
+};
+
+class NoSmartMDPSToggle : public ToggleControl {
+  Q_OBJECT
+
+public:
+  NoSmartMDPSToggle() : ToggleControl("No Smart MDPS", "Turn on, if you have no smartmdps or no mdps harness to avoid sending can under certain speed that is not able to use lane keeping.", "../assets/offroad/icon_shell.png", Params().getBool("NoSmartMDPS")) {
+    QObject::connect(this, &NoSmartMDPSToggle::toggleFlipped, [=](int state) {
+      bool status = state ? true : false;
+      Params().putBool("NoSmartMDPS", status);
     });
   }
 };
@@ -1403,6 +1426,93 @@ class DcGain : public AbstractControl {
 
 public:
   DcGain();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  
+  void refresh();
+};
+
+class TorqueKp : public AbstractControl {
+  Q_OBJECT
+
+public:
+  TorqueKp();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  
+  void refresh();
+};
+
+class TorqueKf : public AbstractControl {
+  Q_OBJECT
+
+public:
+  TorqueKf();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  
+  void refresh();
+};
+
+class TorqueKi : public AbstractControl {
+  Q_OBJECT
+
+public:
+  TorqueKi();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  
+  void refresh();
+};
+
+class TorqueFriction : public AbstractControl {
+  Q_OBJECT
+
+public:
+  TorqueFriction();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  
+  void refresh();
+};
+
+class TorqueUseAngle : public ToggleControl {
+  Q_OBJECT
+
+public:
+  TorqueUseAngle() : ToggleControl("UseAngle", "Use Steer Angle On/Off", "../assets/offroad/icon_shell.png", Params().getBool("TorqueUseAngle")) {
+    QObject::connect(this, &TorqueUseAngle::toggleFlipped, [=](int state) {
+      bool status = state ? true : false;
+      Params().putBool("TorqueUseAngle", status);
+    });
+  }
+};
+
+class TorqueMaxLatAccel : public AbstractControl {
+  Q_OBJECT
+
+public:
+  TorqueMaxLatAccel();
 
 private:
   QPushButton btnplus;
@@ -2153,5 +2263,34 @@ private:
   QPushButton btn1;
   Params params;
   
+  void refresh();
+};
+
+class RPMAnimatedMaxValue : public AbstractControl {
+  Q_OBJECT
+
+public:
+  RPMAnimatedMaxValue();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  
+  void refresh();
+};
+
+class UserSpecificFeature : public AbstractControl {
+  Q_OBJECT
+
+public:
+  UserSpecificFeature();
+
+private:
+  QPushButton btn;
+  QLineEdit edit;
+  Params params;
+
   void refresh();
 };

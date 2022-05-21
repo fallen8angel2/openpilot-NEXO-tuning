@@ -73,6 +73,12 @@ def manager_init() -> None:
     ("PidKi", "50"),
     ("PidKd", "150"),
     ("PidKf", "7"),
+    ("TorqueKp", "20"),
+    ("TorqueKf", "10"),
+    ("TorqueKi", "5"),
+    ("TorqueFriction", "10"),
+    ("TorqueUseAngle", "1"),
+    ("TorqueMaxLatAccel", "30"),
     ("CameraOffsetAdj", "60"),
     ("PathOffsetAdj", "0"),
     ("SteerRatioAdj", "1550"),
@@ -117,7 +123,7 @@ def manager_init() -> None:
     ("MaxRateUp", "3"),
     ("MaxRateDown", "7"),
     ("SteerThreshold", "150"),
-    ("RecordingCount", "100"),
+    ("RecordingCount", "200"),
     ("RecordingQuality", "1"),
     ("CruiseGapAdjust", "0"),
     ("AutoEnable", "1"),
@@ -128,7 +134,7 @@ def manager_init() -> None:
     ("OpkrMonitorEyesThreshold", "45"),
     ("OpkrMonitorNormalEyesThreshold", "45"),
     ("OpkrMonitorBlinkThreshold", "35"),
-    ("MadModeEnabled", "1"),
+    ("UFCModeEnabled", "1"),
     ("WhitePandaSupport", "0"),
     ("SteerWarningFix", "0"),
     ("OpkrRunNaviOnBoot", "0"),
@@ -199,9 +205,12 @@ def manager_init() -> None:
     ("AvoidLKASFaultBeyond", "0"),
     ("UseStockDecelOnSS", "0"),
     ("AnimatedRPM", "1"),
+    ("AnimatedRPMMax", "3600"),
     ("ShowStopLine", "0"),
     ("RoutineDriveOption", "OPKR"),
     ("SshEnabled", "1"),
+    ("UserSpecificFeature", "0"),
+    ("OpkrWakeUp", "0"),
    ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -275,8 +284,6 @@ def manager_init() -> None:
     os.chmod("/dev/shm", 0o777)
     os.chmod(os.path.join(BASEDIR, "cereal"), 0o755)
     os.chmod(os.path.join(BASEDIR, "cereal", "libmessaging_shared.so"), 0o755)
-
-  os.system("/data/openpilot/selfdrive/assets/addon/script/gitcommit.sh")
 
 def manager_prepare() -> None:
   for p in managed_processes.values():

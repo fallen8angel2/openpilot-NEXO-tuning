@@ -210,6 +210,12 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"PidKi", PERSISTENT},
     {"PidKd", PERSISTENT},
     {"PidKf", PERSISTENT},
+    {"TorqueKp", PERSISTENT},
+    {"TorqueKf", PERSISTENT},
+    {"TorqueKi", PERSISTENT},
+    {"TorqueFriction", PERSISTENT},
+    {"TorqueUseAngle", PERSISTENT},
+    {"TorqueMaxLatAccel", PERSISTENT},
     {"CameraOffsetAdj", PERSISTENT},
     {"PathOffsetAdj", PERSISTENT},
     {"SteerRatioAdj", PERSISTENT},
@@ -266,7 +272,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"OpkrMonitorEyesThreshold", PERSISTENT},
     {"OpkrMonitorNormalEyesThreshold", PERSISTENT},
     {"OpkrMonitorBlinkThreshold", PERSISTENT},
-    {"MadModeEnabled", PERSISTENT},
+    {"UFCModeEnabled", PERSISTENT},
     {"CommaStockUI", PERSISTENT},
     {"OpkrEnableUploader", PERSISTENT},
     {"OpkrMapEnable", CLEAR_ON_MANAGER_START},
@@ -350,7 +356,11 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"AvoidLKASFaultBeyond", PERSISTENT},
     {"UseStockDecelOnSS", PERSISTENT},
     {"AnimatedRPM", PERSISTENT},
+    {"AnimatedRPMMax", PERSISTENT},
     {"ShowStopLine", PERSISTENT},
+    {"NoSmartMDPS", PERSISTENT},
+    {"UserSpecificFeature", PERSISTENT},
+    {"OpkrWakeUp", CLEAR_ON_MANAGER_START},
 };
 
 } // namespace

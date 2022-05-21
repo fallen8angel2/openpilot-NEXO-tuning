@@ -8,6 +8,7 @@
 #include <QProcess> // opkr
 #include <QDateTime> // opkr
 #include <QTimer> // opkr
+#include <QFileInfo> // opkr
 
 #ifndef QCOM
 #include "selfdrive/ui/qt/offroad/networking.h"
@@ -280,17 +281,35 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
     QString commit_local = QString::fromStdString(Params().get("GitCommit").substr(0, 10));
     QString commit_remote = QString::fromStdString(Params().get("GitCommitRemote").substr(0, 10));
     QString empty = "";
-    desc += QString("LOCAL: %1\nREMOT: %2%3%4\n").arg(commit_local, commit_remote, empty, empty);
+    desc += QString("LOCAL: %1  REMOTE: %2%3%4\n").arg(commit_local, commit_remote, empty, empty);
     
     if (!last_ping.length()) {
       desc += QString("Network connection is missing or unstable. Check the connection.");
+      if (ConfirmationDialog::alert(desc, this)) {}
     } else if (commit_local == commit_remote) {
       desc += QString("Local and remote match. No update required.");
+      if (ConfirmationDialog::alert(desc, this)) {}
     } else {
-      desc += QString("There's an update. Press the OK button to go.");
-    }
-    if (ConfirmationDialog::confirm(desc, this)) {
-      std::system("/data/openpilot/selfdrive/assets/addon/script/gitpull.sh");
+      if (QFileInfo::exists("/data/OPKR_Updates.txt")) {
+        QFileInfo fileInfo;
+        fileInfo.setFile("/data/OPKR_Updates.txt");
+        const std::string txt = util::read_file("/data/OPKR_Updates.txt");
+        if (UpdateInfoDialog::confirm(desc + "\n" + QString::fromStdString(txt), this)) {
+          std::system("/data/openpilot/selfdrive/assets/addon/script/gitpull.sh");
+        }
+      } else {
+        QString cmd1 = "wget https://raw.githubusercontent.com/openpilotkr/openpilot/"+QString::fromStdString(params.get("GitBranch"))+"/OPKR_Updates.txt -O /data/OPKR_Updates.txt";
+        QProcess::execute(cmd1);
+        QTimer::singleShot(2000, []() {});
+        if (QFileInfo::exists("/data/OPKR_Updates.txt")) {
+          QFileInfo fileInfo;
+          fileInfo.setFile("/data/OPKR_Updates.txt");
+          const std::string txt = util::read_file("/data/OPKR_Updates.txt");
+          if (UpdateInfoDialog::confirm(desc + "\n" + QString::fromStdString(txt), this)) {
+            std::system("/data/openpilot/selfdrive/assets/addon/script/gitpull.sh");
+          }
+        }
+      }
     }
   });
 
@@ -536,7 +555,7 @@ UIPanel::UIPanel(QWidget *parent) : QFrame(parent) {
     }
   });
   layout->addWidget(recorddelbtn);
-  const char* realdata_del = "rm -rf /storage/emulated/0/realdata/*";
+  const char* realdata_del = "rm -rf /data/media/0/realdata/*";
   auto realdatadelbtn = new ButtonControl("Delete All Driving Logs", "RUN");
   QObject::connect(realdatadelbtn, &ButtonControl::clicked, [=]() {
     if (ConfirmationDialog::confirm("Delete all saved driving logs. Do you want to proceed?", this)){
@@ -557,6 +576,7 @@ UIPanel::UIPanel(QWidget *parent) : QFrame(parent) {
   layout->addWidget(new GoogleMapEnabledToggle());
   layout->addWidget(new OPKRTopTextView());
   layout->addWidget(new RPMAnimatedToggle());
+  layout->addWidget(new RPMAnimatedMaxValue());
   layout->addWidget(new ShowStopLineToggle());
 }
 
@@ -637,10 +657,12 @@ DeveloperPanel::DeveloperPanel(QWidget *parent) : QFrame(parent) {
   layout->addWidget(new SteerWarningFixToggle());
   layout->addWidget(new IgnoreCanErroronISGToggle());
   layout->addWidget(new FCA11MessageToggle());
-  layout->addWidget(new MadModeEnabledToggle());
+  layout->addWidget(new UFCModeEnabledToggle());
   layout->addWidget(new StockLKASEnabledatDisenagedStatusToggle());
   layout->addWidget(new C2WithCommaPowerToggle());
   layout->addWidget(new JoystickModeToggle());
+  layout->addWidget(new NoSmartMDPSToggle());
+  layout->addWidget(new UserSpecificFeature());
   layout->addWidget(new TimeZoneSelectCombo());
   const char* cal_ok = "cp -f /data/openpilot/selfdrive/assets/addon/param/CalibrationParams /data/params/d/";
   auto calokbtn = new ButtonControl("Enable Calibration by Force", "RUN");
@@ -717,6 +739,13 @@ TuningPanel::TuningPanel(QWidget *parent) : QFrame(parent) {
     layout->addWidget(new Scale());
     layout->addWidget(new LqrKi());
     layout->addWidget(new DcGain());
+  } else if (lat_control == "3") {
+    layout->addWidget(new TorqueMaxLatAccel());
+    layout->addWidget(new TorqueKp());
+    layout->addWidget(new TorqueKf());
+    layout->addWidget(new TorqueKi());
+    layout->addWidget(new TorqueFriction());
+    layout->addWidget(new TorqueUseAngle());
   }
 
   layout->addWidget(horizontal_line());
