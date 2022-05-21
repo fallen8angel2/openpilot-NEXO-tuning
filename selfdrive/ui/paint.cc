@@ -322,7 +322,8 @@ static void ui_draw_debug(UIState *s) {
     nvgFontSize(s->vg, 50);
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
-    char *szLaCMethod = nullptr;
+
+    char const* szLaCMethod = nullptr;
     if ( !scene.animated_rpm ) 
     {
       switch( scene.lateralControlMethod  )
