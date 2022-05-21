@@ -236,9 +236,10 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
     return;
   }
   // opkr live ui tune
-  if (QUIState::ui_state.scene.live_tune_panel_enable) {
+  if (QUIState::ui_state.scene.live_tune_panel_enable) 
+  {
     if (QUIState::ui_state.scene.started && !sidebar->isVisible() && !QUIState::ui_state.scene.map_on_top && livetunepanel_left_btn.ptInRect(e->x(), e->y())) {
-      
+
       if (QUIState::ui_state.scene.live_tune_panel_list == 0) {
         QUIState::ui_state.scene.cameraOffset = QUIState::ui_state.scene.cameraOffset - 5;
         if (QUIState::ui_state.scene.cameraOffset <= -1000) QUIState::ui_state.scene.cameraOffset = -1000;
@@ -517,6 +518,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
       return;
     }
   }
+  
   // Handle sidebar collapsing
   if (onroad->isVisible() && (!sidebar->isVisible() || e->x() > sidebar->width())) {
     sidebar->setVisible(!sidebar->isVisible() && !onroad->isMapVisible());
