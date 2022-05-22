@@ -17,6 +17,7 @@ from selfdrive.controls.lib.latcontrol_lqr import LatControlLQR
 
 class LatCtrlToqATOM(LatControlTorque):
   def __init__(self, CP, CI, TORQUE):
+    self.params = Params()
     self.sat_count_rate = 1.0 * DT_CTRL
     self.sat_limit = CP.steerLimitTimer
     self.sat_count = 0. 
@@ -35,6 +36,7 @@ class LatCtrlToqATOM(LatControlTorque):
 
 class LatCtrlLqrATOM(LatControlLQR):
   def __init__(self, CP, CI, LQR):
+    self.params = Params()
     self.sat_count_rate = 1.0 * DT_CTRL 
     self.sat_limit = CP.steerLimitTimer 
     self.sat_count = 0. 
