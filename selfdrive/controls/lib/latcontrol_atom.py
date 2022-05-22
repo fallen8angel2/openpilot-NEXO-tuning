@@ -41,6 +41,8 @@ class LatCtrlLqrATOM(LatControlLQR):
     
     # we define the steer torque scale as [-1.0...1.0]
     self.steer_max = 1.0
+    self.ll_timer = 0
+
 
 
     self.scale = LQR.scale
