@@ -35,6 +35,8 @@ class LatCtrlToqATOM(LatControlTorque):
     self.friction = TORQUE.friction
     self.kf = TORQUE.kf
 
+    self.live_tune_enabled = False
+
 
 
 class LatCtrlLqrATOM(LatControlLQR):
