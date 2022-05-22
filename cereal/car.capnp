@@ -547,9 +547,7 @@ struct CarParams {
   struct LateralATOMTuning {
     lqr @0 :LateralLQRTuning;
     torque @1 :LateralTorqueTuning;
-    deadzoneBP @2 :List(Float32);
-    deadzoneV @3 :List(FloatFloat3232); 
-  }
+ }
 
   struct LateralPIDTuning {
     kpBP @0 :List(Float32);
