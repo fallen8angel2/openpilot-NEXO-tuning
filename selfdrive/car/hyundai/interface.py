@@ -92,7 +92,7 @@ class CarInterface(CarInterfaceBase):
     ret.aqValueRaw = 0
 
     params = Params()
-    ret.torqueMaxSpeed = float( params.get("TorqueMaxSpeed", encoding="utf8") ) * CV.KPH_TO_MPH
+    ret.torqueMaxSpeed = float( params.get("TorqueMaxSpeed", encoding="utf8") ) * CV.KPH_TO_MS
     tire_stiffness_factor = float(Decimal(params.get("TireStiffnessFactorAdj", encoding="utf8")) * Decimal('0.01'))
     ret.steerActuatorDelay = float(Decimal(params.get("SteerActuatorDelayAdj", encoding="utf8")) * Decimal('0.01'))
     ret.steerRateCost = float(Decimal(params.get("SteerRateCostAdj", encoding="utf8")) * Decimal('0.01'))
@@ -201,6 +201,9 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1885. + STD_CARGO_KG
       ret.wheelbase = 2.79
     # kia
+    elif candidate == CAR.KIA_FORTE:
+      ret.mass = 3558. * CV.LB_TO_KG
+      ret.wheelbase = 2.80
     elif candidate == CAR.SORENTO_UM:
       ret.mass = 1910. + STD_CARGO_KG
       ret.wheelbase = 2.78

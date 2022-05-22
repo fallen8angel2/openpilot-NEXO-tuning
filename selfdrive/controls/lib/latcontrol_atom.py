@@ -5,6 +5,9 @@ from cereal import log
 from common.realtime import DT_CTRL
 from common.numpy_fast import clip, interp
 
+from common.params import Params
+from decimal import Decimal
+
 
 from selfdrive.controls.lib.latcontrol import LatControl, MIN_STEER_SPEED
 from selfdrive.controls.lib.pid import PIDController
@@ -17,6 +20,8 @@ from selfdrive.controls.lib.latcontrol_lqr import LatControlLQR
 
 class LatCtrlToqATOM(LatControlTorque):
   def __init__(self, CP, CI, TORQUE):
+    self.mpc_frame = 0
+    self.params = Params()
     self.sat_count_rate = 1.0 * DT_CTRL
     self.sat_limit = CP.steerLimitTimer
     self.sat_count = 0. 
@@ -31,16 +36,24 @@ class LatCtrlToqATOM(LatControlTorque):
     self.friction = TORQUE.friction
     self.kf = TORQUE.kf
 
+    self.live_tune_enabled = False
+    self.lt_timer = 0
+
 
 
 class LatCtrlLqrATOM(LatControlLQR):
   def __init__(self, CP, CI, LQR):
+    self.mpc_frame = 0
+    self.live_tune_enabled = False
+    self.params = Params()
     self.sat_count_rate = 1.0 * DT_CTRL 
     self.sat_limit = CP.steerLimitTimer 
     self.sat_count = 0. 
     
     # we define the steer torque scale as [-1.0...1.0]
     self.steer_max = 1.0
+    self.ll_timer = 0
+
 
 
     self.scale = LQR.scale
@@ -83,7 +96,7 @@ class LatControlATOM(LatControl):
     self.LaLqr.reset()
     self.LaToq.reset()
 
-  def update(self, active, CS, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk):
+  def update(self, active, CS, CP, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk):
     atom_log = log.ControlsState.LateralATOMState.new_message()
 
     if CS.vEgo < MIN_STEER_SPEED or not active:
@@ -93,8 +106,8 @@ class LatControlATOM(LatControl):
       if not active:
         self.reset()
     else:
-      lqr_output_torque, lqr_desired_angle, lqr_log  = self.LaLqr.update( active, CS, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk )
-      toq_output_torque, toq_desired_angle, toq_log  = self.LaToq.update( active, CS, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk )
+      lqr_output_torque, lqr_desired_angle, lqr_log  = self.LaLqr.update( active, CS, CP, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk )
+      toq_output_torque, toq_desired_angle, toq_log  = self.LaToq.update( active, CS, CP, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk )
 
       if CS.vEgo < self.torqueMaxSpeed:  # 12.5 45 kph
         selected = 1.0  # toq
