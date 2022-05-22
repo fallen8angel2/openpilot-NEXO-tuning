@@ -40,6 +40,7 @@ class LatCtrlToqATOM(LatControlTorque):
 class LatCtrlLqrATOM(LatControlLQR):
   def __init__(self, CP, CI, LQR):
     self.mpc_frame = 0
+    self.live_tune_enabled = False
     self.params = Params()
     self.sat_count_rate = 1.0 * DT_CTRL 
     self.sat_limit = CP.steerLimitTimer 
