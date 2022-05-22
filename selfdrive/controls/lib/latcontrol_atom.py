@@ -36,6 +36,7 @@ class LatCtrlToqATOM(LatControlTorque):
     self.kf = TORQUE.kf
 
     self.live_tune_enabled = False
+    self.lt_timer = 0
 
 
 
