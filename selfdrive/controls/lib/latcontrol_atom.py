@@ -83,7 +83,7 @@ class LatControlATOM(LatControl):
     self.LaLqr.reset()
     self.LaToq.reset()
 
-  def update(self, active, CS, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk):
+  def update(self, active, CS, CP, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk):
     atom_log = log.ControlsState.LateralATOMState.new_message()
 
     if CS.vEgo < MIN_STEER_SPEED or not active:
