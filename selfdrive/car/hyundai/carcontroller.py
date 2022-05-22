@@ -858,12 +858,8 @@ class CarController():
           self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(float(Decimal(self.params.get("TorqueKp", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
            float(Decimal(self.params.get("TorqueKf", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, float(Decimal(self.params.get("TorqueKi", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
            float(Decimal(self.params.get("TorqueFriction", encoding="utf8")) * Decimal('0.001')))
-        else:  # CS.CP.lateralTuning.which() == 'torque':
-           max_lat_accel = float(Decimal(self.params.get("TorqueMaxLatAccel", encoding="utf8"))*Decimal('0.1')) 
-           self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(float(Decimal(self.params.get("TorqueKp", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \ 
-            float(Decimal(self.params.get("TorqueKf", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, float(Decimal(self.params.get("TorqueKi", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
-            float(Decimal(self.params.get("TorqueFriction", encoding="utf8")) * Decimal('0.001')))
-
+        else:
+          self.str_log2 = 'Hybrid'
 
     trace1.printf1('{}  {}'.format(str_log1, self.str_log2))
 
