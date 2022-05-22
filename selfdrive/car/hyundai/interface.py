@@ -54,6 +54,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.minSteerSpeed = 16.67 # m/s
 
+
+
     # Most Hyundai car ports are community features for now
     ret.pcmCruise = not ret.radarOffCan
 
@@ -90,7 +92,7 @@ class CarInterface(CarInterfaceBase):
     ret.aqValueRaw = 0
 
     params = Params()
-
+    ret.torqueMaxSpeed = float( params.get("TorqueMaxSpeed", encoding="utf8") ) * CV.KPH_TO_MS
     tire_stiffness_factor = float(Decimal(params.get("TireStiffnessFactorAdj", encoding="utf8")) * Decimal('0.01'))
     ret.steerActuatorDelay = float(Decimal(params.get("SteerActuatorDelayAdj", encoding="utf8")) * Decimal('0.01'))
     ret.steerRateCost = float(Decimal(params.get("SteerRateCostAdj", encoding="utf8")) * Decimal('0.01'))
@@ -106,6 +108,8 @@ class CarInterface(CarInterfaceBase):
       set_lat_tune(ret.lateralTuning, LatTunes.LQR)
     elif lat_control_method == 3:
       set_lat_tune(ret.lateralTuning, LatTunes.TORQUE)
+    elif lat_control_method == 4:
+      set_lat_tune(ret.lateralTuning, LatTunes.ATOM)    # Hybrid tune  
 
     # genesis
     if candidate == CAR.GENESIS_DH:
@@ -197,6 +201,9 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1885. + STD_CARGO_KG
       ret.wheelbase = 2.79
     # kia
+    elif candidate == CAR.KIA_FORTE:
+      ret.mass = 3558. * CV.LB_TO_KG
+      ret.wheelbase = 2.80
     elif candidate == CAR.SORENTO_UM:
       ret.mass = 1910. + STD_CARGO_KG
       ret.wheelbase = 2.78

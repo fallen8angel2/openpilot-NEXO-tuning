@@ -1265,6 +1265,9 @@ private:
   QLabel label;
   Params params;
   
+  int latcontrol;
+
+
   void refresh();
 };
 
@@ -1400,6 +1403,22 @@ private:
   QLabel label;
   Params params;
   
+  void refresh();
+};
+
+class TorqueMaxSpeed : public AbstractControl {
+  Q_OBJECT
+
+public:
+  TorqueMaxSpeed();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  double  dTorqueMaxSpeed;
+
   void refresh();
 };
 
