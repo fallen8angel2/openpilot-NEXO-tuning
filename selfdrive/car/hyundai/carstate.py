@@ -363,18 +363,18 @@ class CarState(CarStateBase):
     if not self.CP.carFingerprint in FEATURES["use_elect_gears"]:
       if self.CP.carFingerprint in FEATURES["use_cluster_gears"]:
         ret.currentGear = cp.vl["LVR11"]["CF_Lvr_CGear"]
-      elif self.CP.carFingerprint in FEATURES["use_cluster_gears_ext"]: # for Avante, I30
-        ret.currentGear = cp.vl["TCU12"]["CUR_GR"]
+      # elif self.CP.carFingerprint in FEATURES["use_cluster_gears_ext"]: # for Avante, I30
+      #   ret.currentGear = cp.vl["TCU12"]["CUR_GR"]
       elif self.CP.carFingerprint in FEATURES["use_tcu_gears"]:
         ret.currentGear = cp.vl["TCU12"]["CUR_GR"]
       else:
         ret.currentGear = cp.vl["LVR11"]["CF_Lvr_CGear"]
-    if self.CP.fcaBus != -1 or self.CP.carFingerprint in FEATURES["use_fca"]:
-      ret.stockAeb = cp_fca.vl["FCA11"]["FCA_CmdAct"] != 0
-      ret.stockFcw = cp_fca.vl["FCA11"]["CF_VSM_Warn"] == 2
-    elif not self.CP.radarOffCan:
-      ret.stockAeb = cp_scc.vl["SCC12"]["AEB_CmdAct"] != 0
-      ret.stockFcw = cp_scc.vl["SCC12"]["CF_VSM_Warn"] == 2
+    # if self.CP.fcaBus != -1 or self.CP.carFingerprint in FEATURES["use_fca"]:
+    #   ret.stockAeb = cp_fca.vl["FCA11"]["FCA_CmdAct"] != 0
+    #   ret.stockFcw = cp_fca.vl["FCA11"]["CF_VSM_Warn"] == 2
+    # elif not self.CP.radarOffCan:
+    #   ret.stockAeb = cp_scc.vl["SCC12"]["AEB_CmdAct"] != 0
+    #   ret.stockFcw = cp_scc.vl["SCC12"]["CF_VSM_Warn"] == 2
 
     if self.CP.sccBus != -1:
       if self.CP.carFingerprint in FEATURES["use_fca"] or self.fca11_message:
