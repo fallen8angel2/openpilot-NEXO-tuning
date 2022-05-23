@@ -362,6 +362,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"NoSmartMDPS", PERSISTENT},
     {"UserSpecificFeature", PERSISTENT},
     {"OpkrWakeUp", CLEAR_ON_MANAGER_START},
+    {"TorqueMaxSpeed", PERSISTENT},
 };
 
 } // namespace

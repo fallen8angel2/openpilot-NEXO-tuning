@@ -42,9 +42,9 @@ def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
   left_lane_warning = 0
   right_lane_warning = 0
   if left_lane_depart:
-    left_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
+    left_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90_HI, CAR.GENESIS_G80_DH) else 2
   if right_lane_depart:
-    right_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
+    right_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90_HI, CAR.GENESIS_G80_DH) else 2
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
@@ -187,6 +187,7 @@ class CarController():
     self.fca11supcnt = self.fca11inc = self.fca11alivecnt = self.fca11cnt13 = 0
     self.fca11maxcnt = 0xD
 
+    self.str_log2 = 'Hybrid'
     if CP.lateralTuning.which() == 'pid':
       self.str_log2 = 'T={:0.2f}/{:0.3f}/{:0.2f}/{:0.5f}'.format(CP.lateralTuning.pid.kpV[1], CP.lateralTuning.pid.kiV[1], CP.lateralTuning.pid.kdV[0], CP.lateralTuning.pid.kf)
     elif CP.lateralTuning.which() == 'indi':
@@ -825,7 +826,7 @@ class CarController():
         self.aq_value_raw = aReqValue
         can_sends.append(create_scc11(self.packer, frame, set_speed, lead_visible, self.scc_live, self.dRel, self.vRel, self.yRel, 
          self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.acc_standstill, self.gapsettingdance, self.stopped, radar_recog, CS.scc11))
-        if (CS.brake_check or CS.cancel_check) and self.car_fingerprint != CAR.NIRO_EV:
+        if (CS.brake_check or CS.cancel_check) and self.car_fingerprint != CAR.NIRO_EV_DE:
           can_sends.append(create_scc12(self.packer, accel, enabled, self.scc_live, CS.out.gasPressed, 1, 
            CS.out.stockAeb, self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.stopped, self.acc_standstill, radar_recog, CS.scc12))
         else:
@@ -891,6 +892,8 @@ class CarController():
           self.str_log2 = 'T={:3.1f}/{:0.2f}/{:0.2f}/{:0.2f}/{:0.2f}'.format(max_lat_accel, float(Decimal(self.params.get("TorqueKp", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
            float(Decimal(self.params.get("TorqueKf", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, float(Decimal(self.params.get("TorqueKi", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
            float(Decimal(self.params.get("TorqueFriction", encoding="utf8")) * Decimal('0.001')))
+        else:
+          self.str_log2 = 'Hybrid'
 
     trace1.printf1('{}  {}'.format(str_log1, self.str_log2))
 
