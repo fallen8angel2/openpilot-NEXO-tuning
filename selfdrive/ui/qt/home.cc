@@ -490,11 +490,11 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
     {
         nBtnDir = -1;
 
-    }
+      }
     else if ( livetunepanel_right_btn.ptInRect(e->x(), e->y())) 
     {
        nBtnDir = 1;
-    }
+      }
     else if ( livetunepanel_left_above_btn.ptInRect(e->x(), e->y())) 
     {
       QUIState::ui_state.scene.live_tune_panel_list -= 1;
@@ -511,8 +511,8 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
 
       QUIState::ui_state.scene.live_tune_panel_list = QUIState::ui_state.scene.list_count + nLoop;
       //clip( QUIState::ui_state.scene.live_tune_panel_list, 1, 0 );
-      return;
-    }
+        return;
+      }
     else if (  livetunepanel_right_above_btn.ptInRect(e->x(), e->y())) 
     {
       QUIState::ui_state.scene.live_tune_panel_list += 1;
@@ -524,12 +524,12 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
         nLoop += 4;
       } else if (QUIState::ui_state.scene.lateralControlMethod < 2 ) {
         nLoop += 3;
-      }
+    }
 
       if( QUIState::ui_state.scene.live_tune_panel_list > nLoop )  return;
       QUIState::ui_state.scene.live_tune_panel_list = 0;
-      return;
-    }
+        return;
+      }
 
     if( nBtnDir )
     {
@@ -538,7 +538,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e)
       if( QUIState::ui_state.scene.lateralControlMethod == 0 )
       {
          mousePressPID( e, nBtnDir );
-      } 
+      }
       else if ( QUIState::ui_state.scene.lateralControlMethod == 1) // 1. INDI
       {        
         mousePressINDI( e, nBtnDir );
