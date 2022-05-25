@@ -4171,7 +4171,7 @@ TorqueMaxSpeed::TorqueMaxSpeed() : AbstractControl("TorqueMaxSpeed", "Adjust Tor
   
   QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
     dTorqueMaxSpeed += 1;
-    if (dTorqueMaxSpeed >= 150) dTorqueMaxSpeed = 150;
+    if (dTorqueMaxSpeed >= 120) dTorqueMaxSpeed = 120;
 
     QString values = QString::number(dTorqueMaxSpeed);
     params.put("TorqueMaxSpeed", values.toStdString());

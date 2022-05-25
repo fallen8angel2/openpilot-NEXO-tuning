@@ -758,7 +758,7 @@ TuningPanel::TuningPanel(QWidget *parent) : QFrame(parent) {
     layout->addWidget(new Scale());
     layout->addWidget(new LqrKi());
     layout->addWidget(new DcGain());    
-  }  
+  }
 
   layout->addWidget(horizontal_line());
 

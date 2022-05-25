@@ -407,6 +407,8 @@ static void ui_draw_debug(UIState *s) {
       ui_print(s, ui_viz_rx, ui_viz_ry+600, "SL:%.0f", (*s->sm)["carState"].getCarState().getSafetySign());
       ui_print(s, ui_viz_rx, ui_viz_ry+640, "DS:%.0f", (*s->sm)["carState"].getCarState().getSafetyDist());
     }
+    nvgFontSize(s->vg, 50);
+    nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
     if (scene.osm_enabled) {
       ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+240, "SL:%.0f", scene.liveMapData.ospeedLimit);
       ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+280, "SLA:%.0f", scene.liveMapData.ospeedLimitAhead);
@@ -418,22 +420,17 @@ static void ui_draw_debug(UIState *s) {
       ui_draw_text(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+520, scene.liveMapData.ocurrentRoadName.c_str(), 34, COLOR_WHITE_ALPHA(125), "KaiGenGothicKR-Medium");
     }
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-
-
     char const* szLaCMethod = nullptr;
-    if ( !scene.animated_rpm ) 
-    {
-      switch( scene.lateralControlMethod  )
-      {
+    if ( !scene.animated_rpm ) {
+      switch( scene.lateralControlMethod  ) {
         case  0: szLaCMethod = "PID"; break;
         case  1: szLaCMethod = "INDI"; break;
         case  2: szLaCMethod = "LQR"; break;
         case  3: szLaCMethod = "TORQUE"; break;
         case  4: szLaCMethod = "HYBRID"; break;
       }
-
       if( szLaCMethod )
-          ui_draw_text(s, ui_viz_rx_center, bdr_s+310, szLaCMethod, 60, COLOR_YELLOW_ALPHA(200), "sans-bold");
+        ui_draw_text(s, ui_viz_rx_center, bdr_s+310, szLaCMethod, 60, COLOR_YELLOW_ALPHA(200), "sans-bold");
     }
   }
   if (scene.cal_view) {
