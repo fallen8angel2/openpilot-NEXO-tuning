@@ -243,6 +243,8 @@ void fill_plan(cereal::ModelDataV2::Builder &framed, const ModelOutputPlanPredic
 
 void fill_lane_lines(cereal::ModelDataV2::Builder &framed, const std::array<float, TRAJECTORY_SIZE> &plan_t,
                      const ModelOutputLaneLines &lanes) {
+
+
   std::array<float, TRAJECTORY_SIZE> left_far_y, left_far_z;
   std::array<float, TRAJECTORY_SIZE> left_near_y, left_near_z;
   std::array<float, TRAJECTORY_SIZE> right_near_y, right_near_z;
