@@ -29,7 +29,7 @@ PidKf:7
 TorqueKp:20
 TorqueKf:10
 TorqueKi:5
-TorqueFriction:10
+TorqueFriction:0
 TorqueUseAngle:1
 TorqueMaxLatAccel:30
 CameraOffsetAdj:60
@@ -137,4 +137,8 @@ AnimatedRPM:1
 AnimatedRPMMax:3600
 ShowStopLine:0
 NoSmartMDPS:0
-TorqueMaxSpeed:35
+MultipleLateralUse:0
+MultipleLateralOpS:3,2,0
+MultipleLateralSpd:30,80
+MultipleLateralOpA:0,2,3
+MultipleLateralAng:10,30

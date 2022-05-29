@@ -76,7 +76,7 @@ def manager_init() -> None:
     ("TorqueKp", "20"),
     ("TorqueKf", "10"),
     ("TorqueKi", "5"),
-    ("TorqueFriction", "10"),
+    ("TorqueFriction", "0"),
     ("TorqueUseAngle", "1"),
     ("TorqueMaxLatAccel", "30"),
     ("CameraOffsetAdj", "60"),
@@ -211,7 +211,11 @@ def manager_init() -> None:
     ("SshEnabled", "1"),
     ("UserSpecificFeature", "0"),
     ("OpkrWakeUp", "0"),
-    ("TorqueMaxSpeed", "35"),
+    ("MultipleLateralUse", "0"),
+    ("MultipleLateralOpS", "3,2,0"),
+    ("MultipleLateralSpd", "30,80"),
+    ("MultipleLateralOpA", "0,2,3"),
+    ("MultipleLateralAng", "10,30"),
    ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

@@ -391,9 +391,9 @@ static void ui_draw_debug(UIState *s) {
     ui_print(s, ui_viz_rx, ui_viz_ry+360, "AD:%.2f", scene.steer_actuator_delay);
     ui_print(s, ui_viz_rx, ui_viz_ry+400, "SC:%.2f", scene.lateralPlan.steerRateCost);
     ui_print(s, ui_viz_rx, ui_viz_ry+440, "OS:%.2f", abs(scene.output_scale));
-    ui_print(s, ui_viz_rx, ui_viz_ry+480, "%4.1f|%4.1f", scene.lateralPlan.lProb*100, scene.lateralPlan.rProb*100);
-    ui_print(s, ui_viz_rx, ui_viz_ry+520, "%4.1f/%3.1fm", scene.lateralPlan.dProb*100, scene.lateralPlan.laneWidth); // High dProb is more related to LaneLine, Low is Laneless
-    ui_print(s, ui_viz_rx, ui_viz_ry+560, "%.1f/%.1f/%.1f/%.1f/%.1f/%.1f", std::clamp<float>(1.0 - scene.road_edge_stds[0], 0.0, 1.0), scene.lane_line_probs[0], scene.lane_line_probs[1], scene.lane_line_probs[2], scene.lane_line_probs[3], std::clamp<float>(1.0 - scene.road_edge_stds[1], 0.0, 1.0));    
+    ui_print(s, ui_viz_rx, ui_viz_ry+480, "%.2f|%.2f", scene.lateralPlan.lProb, scene.lateralPlan.rProb);
+    ui_print(s, ui_viz_rx, ui_viz_ry+520, "%.1f/%.1fm", scene.lateralPlan.dProb, scene.lateralPlan.laneWidth); // High dProb is more related to LaneLine, Low is Laneless
+    ui_print(s, ui_viz_rx, ui_viz_ry+560, "%.1f/%.1f/%.1f/%.1f/%.1f/%.1f", std::clamp<float>(1.0 - scene.road_edge_stds[0], 0.0, 1.0), scene.lane_line_probs[0], scene.lane_line_probs[1], scene.lane_line_probs[2], scene.lane_line_probs[3], std::clamp<float>(1.0 - scene.road_edge_stds[1], 0.0, 1.0));
     // const std::string stateStrings[] = {"disabled", "preEnabled", "enabled", "softDisabling"};
     // ui_print(s, ui_viz_rx, ui_viz_ry+520, "%s", stateStrings[(int)(*s->sm)["controlsState"].getControlsState().getState()].c_str());
     //ui_print(s, ui_viz_rx, ui_viz_ry+800, "A:%.5f", scene.accel_sensor2);
@@ -408,38 +408,59 @@ static void ui_draw_debug(UIState *s) {
       ui_print(s, ui_viz_rx, ui_viz_ry+640, "DS:%.0f", (*s->sm)["carState"].getCarState().getSafetyDist());
     }
     nvgFontSize(s->vg, 50);
-    nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
-    if (scene.osm_enabled) {
-      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+240, "SL:%.0f", scene.liveMapData.ospeedLimit);
-      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+280, "SLA:%.0f", scene.liveMapData.ospeedLimitAhead);
-      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+320, "SLAD:%.0f", scene.liveMapData.ospeedLimitAheadDistance);
-      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+360, "TSL:%.0f", scene.liveMapData.oturnSpeedLimit);
-      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+400, "TSLED:%.0f", scene.liveMapData.oturnSpeedLimitEndDistance);
-      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+440, "TSLS:%d", scene.liveMapData.oturnSpeedLimitSign);
-      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+480, "TCO:%.2f", -scene.lateralPlan.totalCameraOffset);
-      ui_draw_text(s, ui_viz_rx+(scene.mapbox_running ? 150:220), ui_viz_ry+520, scene.liveMapData.ocurrentRoadName.c_str(), 34, COLOR_WHITE_ALPHA(125), "KaiGenGothicKR-Medium");
-    }
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+
+
     char const* szLaCMethod = nullptr;
-    if ( !scene.animated_rpm ) {
-      switch( scene.lateralControlMethod  ) {
+    char const* szLaCMethodCur = nullptr;
+    switch( scene.lateralControlMethod  )
+      {
         case  0: szLaCMethod = "PID"; break;
         case  1: szLaCMethod = "INDI"; break;
         case  2: szLaCMethod = "LQR"; break;
         case  3: szLaCMethod = "TORQUE"; break;
-        case  4: szLaCMethod = "HYBRID"; break;
+        case  4: szLaCMethod = "MULTI"; break;
       }
+    switch( (int)scene.multi_lat_selected  )
+      {
+        case  0: szLaCMethodCur = "PID"; break;
+        case  1: szLaCMethodCur = "INDI"; break;
+        case  2: szLaCMethodCur = "LQR"; break;
+        case  3: szLaCMethodCur = "TORQUE"; break;
+      }
+    if ( !scene.animated_rpm )
+    {
       if( szLaCMethod )
-        ui_draw_text(s, ui_viz_rx_center, bdr_s+310, szLaCMethod, 60, COLOR_YELLOW_ALPHA(200), "sans-bold");
+          ui_print(s, ui_viz_rx_center, bdr_s+295, szLaCMethod );
+      if (scene.lateralControlMethod == 4) {
+        if( szLaCMethodCur )
+            ui_print(s, ui_viz_rx_center, bdr_s+330, szLaCMethodCur );
+        }
+    } else {
+      if( szLaCMethod )
+          ui_print(s, ui_viz_rx_center, bdr_s+320, szLaCMethod );
+      if (scene.lateralControlMethod == 4) {
+        if( szLaCMethodCur )
+            ui_print(s, ui_viz_rx_center, bdr_s+355, szLaCMethodCur );
+        }
+    }
+    nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+    if (scene.osm_enabled) {
+      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+240, "SL:%.0f", scene.liveMapData.ospeedLimit);
+      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+280, "SLA:%.0f", scene.liveMapData.ospeedLimitAhead);
+      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+320, "SLAD:%.0f", scene.liveMapData.ospeedLimitAheadDistance);
+      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+360, "TSL:%.0f", scene.liveMapData.oturnSpeedLimit);
+      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+400, "TSLED:%.0f", scene.liveMapData.oturnSpeedLimitEndDistance);
+      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+440, "TSLS:%d", scene.liveMapData.oturnSpeedLimitSign);
+      ui_print(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+480, "TCO:%.2f", -scene.lateralPlan.totalCameraOffset);
+      ui_draw_text(s, ui_viz_rx+(scene.mapbox_running ? 150:200), ui_viz_ry+520, scene.liveMapData.ocurrentRoadName.c_str(), 34, COLOR_WHITE_ALPHA(125), "KaiGenGothicKR-Medium");
     }
   }
   if (scene.cal_view) {
-    nvgFontSize(s->vg, 120);
-    nvgFillColor(s->vg, COLOR_RED_ALPHA(200));
-    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-    ui_print(s, ui_viz_rx_center, ui_viz_ry+600, "BF:%.1f   RL:%.1f°", scene.accel_prob[0], scene.accel_prob[1]);
-  }      
+    ui_print(s, ui_viz_rx, ui_viz_ry+760, "BF:%.1f   RL:%.1f°", scene.accel_prob[0], scene.accel_prob[1]);
+  }
 }
+
 
 /*
   park @1;
@@ -1669,101 +1690,174 @@ static void ui_draw_live_tune_panel(UIState *s) {
   nvgFill(s->vg);
 
   //param value
-  nvgFontSize(s->vg, 170);
+  nvgFontSize(s->vg, 120);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
 
-  int live_tune_panel_list =  s->scene.live_tune_panel_list;
-  int  lateralControlMethod = s->scene.lateralControlMethod;
+  int live_tune_panel_list = s->scene.live_tune_panel_list;
+  int lateralControlMethod = s->scene.lateralControlMethod;
 
   char const* szTuneName = nullptr;
   char szTuneParam[100];
-
+  int list_menu = live_tune_panel_list - (s->scene.list_count);
 
   if (live_tune_panel_list == 0) {
-    sprintf( szTuneParam, "%+0.3f", s->scene.cameraOffset*0.001);
-    szTuneName =  "CameraOffset";
+    sprintf(szTuneParam, "%+0.3f", s->scene.cameraOffset*0.001);
+    szTuneName = "CameraOffset";
   } else if (live_tune_panel_list == 1) {
-    sprintf( szTuneParam, "%+0.3f", s->scene.pathOffset*0.001);
-    szTuneName =  "PathOffset";
+    sprintf(szTuneParam, "%+0.3f", s->scene.pathOffset*0.001);
+    szTuneName = "PathOffset";
   } else if (live_tune_panel_list == 2) {
-    sprintf( szTuneParam, "%0.2f", s->scene.osteerRateCost*0.01);
-    szTuneName =  "SteerRateCost";
-  } 
-  else if ( lateralControlMethod == 0) 
-  {
-      if (live_tune_panel_list == (s->scene.list_count+0)  ) {
-        sprintf( szTuneParam, "%0.2f", s->scene.pidKp*0.01);
-        szTuneName =  "Pid: Kp";
-      } else if (live_tune_panel_list == (s->scene.list_count+1)  ) {
-        sprintf( szTuneParam, "%0.3f", s->scene.pidKi*0.001);
-        szTuneName =  "Pid: Ki";
-      } else if (live_tune_panel_list == (s->scene.list_count+2)  ) {
-        sprintf( szTuneParam, "%0.2f", s->scene.pidKd*0.01);
-        szTuneName =  "Pid: Kd";
-      } else if (live_tune_panel_list == (s->scene.list_count+3)  ) {
-        sprintf( szTuneParam, "%0.5f", s->scene.pidKf*0.00001);
-        szTuneName =  "Pid: Kf";
-      }
-  } 
-  else if ( lateralControlMethod == 1) 
-  {        
-    if (live_tune_panel_list == (s->scene.list_count+0)  ) {
-      sprintf( szTuneParam, "%0.1f", s->scene.indiInnerLoopGain*0.1);
-      szTuneName =  "INDI: ILGain";
-    } else if (live_tune_panel_list == (s->scene.list_count+1)  ) {
-      sprintf( szTuneParam, "%0.1f", s->scene.indiOuterLoopGain*0.1);
-      szTuneName =  "INDI: OLGain";
-    } else if (live_tune_panel_list == (s->scene.list_count+2)  ) {
-      sprintf( szTuneParam, "%0.1f", s->scene.indiTimeConstant*0.1);
-      szTuneName =  "INDI: TConst";
-    } else if (live_tune_panel_list == (s->scene.list_count+3)  ) {
-      sprintf( szTuneParam, "%0.1f", s->scene.indiActuatorEffectiveness*0.1);
+    sprintf(szTuneParam, "%0.2f", s->scene.osteerRateCost*0.01);
+    szTuneName = "SteerRateCost";
+  } else if (lateralControlMethod == 0) {  // 0.PID
+
+    if ( list_menu == 0 ) {
+      sprintf(szTuneParam, "%0.2f", s->scene.pidKp*0.01);
+      szTuneName = "Pid: Kp";
+    } else if (list_menu == 1 ) {
+      sprintf(szTuneParam, "%0.3f", s->scene.pidKi*0.001);
+      szTuneName = "Pid: Ki";
+    } else if (list_menu == 2 ) {
+      sprintf(szTuneParam, "%0.2f", s->scene.pidKd*0.01);
+      szTuneName = "Pid: Kd";
+    } else if (list_menu == 3 ) {
+      sprintf(szTuneParam, "%0.5f", s->scene.pidKf*0.00001);
+      szTuneName = "Pid: Kf";
+    }
+  } else if (lateralControlMethod == 1) {         // 1.INDI
+
+    if ( list_menu == 0 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiInnerLoopGain*0.1);
+      szTuneName = "INDI: ILGain";
+    } else if ( list_menu == 1 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiOuterLoopGain*0.1);
+      szTuneName = "INDI: OLGain";
+    } else if ( list_menu == 2 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiTimeConstant*0.1);
+      szTuneName = "INDI: TConst";
+    } else if ( list_menu == 3 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiActuatorEffectiveness*0.1);
       szTuneName = "INDI: ActEffct";
     }
-  } 
-  else if ( lateralControlMethod == 2) 
-  {  
-    if (live_tune_panel_list == (s->scene.list_count+0)  ) {
-      sprintf( szTuneParam, "%0.0f", s->scene.lqrScale*1.0);
-      szTuneName =  "LQR: Scale";
-    } else if (live_tune_panel_list == (s->scene.list_count+1)  ) {
-      sprintf( szTuneParam, "%0.3f", s->scene.lqrKi*0.001);
-      szTuneName =  "LQR: Ki";
-    } else if (live_tune_panel_list == (s->scene.list_count+2)  ) {
-      sprintf( szTuneParam, "%0.5f", s->scene.lqrDcGain*0.00001);
+  } else if (lateralControlMethod == 2) {       // 2.LQR
+
+    if ( list_menu == 0 ) {
+      sprintf(szTuneParam, "%0.0f", s->scene.lqrScale*1.0);
+      szTuneName = "LQR: Scale";
+    } else if ( list_menu == 1) {
+      sprintf(szTuneParam, "%0.3f", s->scene.lqrKi*0.001);
+      szTuneName = "LQR: Ki";
+    } else if ( list_menu == 2 ) {
+      sprintf(szTuneParam, "%0.5f", s->scene.lqrDcGain*0.00001);
       szTuneName = "LQR: DcGain";
     }
-  } 
-  else if ( lateralControlMethod == 3 )  
-  {  
-      float max_lat_accel = s->scene.torqueMaxLatAccel * 0.1;    
-      if (live_tune_panel_list == (s->scene.list_count+0)  ) {
-        sprintf( szTuneParam, "%0.1f>%0.2f", s->scene.torqueKp*0.1, (s->scene.torqueKp*0.1)/max_lat_accel);
-        szTuneName = "TORQUE: Kp";
-      } else if (live_tune_panel_list == (s->scene.list_count+1)  ) {
-        sprintf( szTuneParam, "%0.1f>%0.2f", s->scene.torqueKf*0.1, (s->scene.torqueKf*0.1)/max_lat_accel);
-        szTuneName = "TORQUE: Kf";
-      } else if (live_tune_panel_list == (s->scene.list_count+2)  ) {
-        sprintf( szTuneParam, "%0.1f>%0.2f", s->scene.torqueKi*0.1, (s->scene.torqueKi*0.1)/max_lat_accel);
-        szTuneName = "TORQUE: Ki";
-      } else if (live_tune_panel_list == (s->scene.list_count+3)  ) {
-        sprintf( szTuneParam, "%0.1f", s->scene.torqueMaxLatAccel*0.1);
-        szTuneName =  "TORQUE: MaxL";
-      } else if (live_tune_panel_list == (s->scene.list_count+4)  ) {
-        sprintf( szTuneParam, "%0.3f", s->scene.torqueFriction*0.001);
-        szTuneName = "TORQUE: Fric";
-      }
+  } else if (lateralControlMethod == 3) {     // 3.TORQUE
+    float max_lat_accel = s->scene.torqueMaxLatAccel * 0.1;
+
+    if ( list_menu == 0 ) {
+      sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKp*0.1, (s->scene.torqueKp*0.1)/max_lat_accel);
+      szTuneName = "TORQUE: Kp";
+    } else if ( list_menu == 1 ) {
+      sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKf*0.1, (s->scene.torqueKf*0.1)/max_lat_accel);
+      szTuneName = "TORQUE: Kf";
+    } else if ( list_menu == 2 ) {
+      sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKi*0.1, (s->scene.torqueKi*0.1)/max_lat_accel);
+      szTuneName = "TORQUE: Ki";
+    } else if ( list_menu == 3 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.torqueMaxLatAccel*0.1);
+      szTuneName = "TORQUE: MaxL";
+    } else if ( list_menu == 4 ) {
+      sprintf(szTuneParam, "%0.3f", s->scene.torqueFriction*0.001);
+      szTuneName = "TORQUE: Fric";
+    }
+  } else if (lateralControlMethod == 4) {     // 4.MULTI
+    float max_lat_accel = s->scene.torqueMaxLatAccel * 0.1;
+    if ( list_menu == 0 ) {
+      sprintf(szTuneParam, "%0.2f", s->scene.pidKp*0.01);
+      szTuneName = "Pid: Kp";
+    } else if (list_menu == 1 ) {
+      sprintf(szTuneParam, "%0.3f", s->scene.pidKi*0.001);
+      szTuneName = "Pid: Ki";
+    } else if (list_menu == 2 ) {
+      sprintf(szTuneParam, "%0.2f", s->scene.pidKd*0.01);
+      szTuneName = "Pid: Kd";
+    } else if (list_menu == 3 ) {
+      sprintf(szTuneParam, "%0.5f", s->scene.pidKf*0.00001);
+      szTuneName = "Pid: Kf";
+    } else if ( list_menu == 4 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiInnerLoopGain*0.1);
+      szTuneName = "INDI: ILGain";
+    } else if ( list_menu == 5 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiOuterLoopGain*0.1);
+      szTuneName = "INDI: OLGain";
+    } else if ( list_menu == 6 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiTimeConstant*0.1);
+      szTuneName = "INDI: TConst";
+    } else if ( list_menu == 7 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.indiActuatorEffectiveness*0.1);
+      szTuneName = "INDI: ActEffct";
+    } else if ( list_menu == 8 ) {
+      sprintf(szTuneParam, "%0.0f", s->scene.lqrScale*1.0);
+      szTuneName = "LQR: Scale";
+    } else if ( list_menu == 9) {
+      sprintf(szTuneParam, "%0.3f", s->scene.lqrKi*0.001);
+      szTuneName = "LQR: Ki";
+    } else if ( list_menu == 10 ) {
+      sprintf(szTuneParam, "%0.5f", s->scene.lqrDcGain*0.00001);
+      szTuneName = "LQR: DcGain";
+    } else if ( list_menu == 11 ) {
+      sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKp*0.1, (s->scene.torqueKp*0.1)/max_lat_accel);
+      szTuneName = "TORQUE: Kp";
+    } else if ( list_menu == 12 ) {
+      sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKf*0.1, (s->scene.torqueKf*0.1)/max_lat_accel);
+      szTuneName = "TORQUE: Kf";
+    } else if ( list_menu == 13 ) {
+      sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKi*0.1, (s->scene.torqueKi*0.1)/max_lat_accel);
+      szTuneName = "TORQUE: Ki";
+    } else if ( list_menu == 14 ) {
+      sprintf(szTuneParam, "%0.1f", s->scene.torqueMaxLatAccel*0.1);
+      szTuneName = "TORQUE: MaxL";
+    } else if ( list_menu == 15 ) {
+      sprintf(szTuneParam, "%0.3f", s->scene.torqueFriction*0.001);
+      szTuneName = "TORQUE: Fric";
+    }
   }
+  // } else if (lateralControlMethod == 4) {  
+  //   float max_lat_accel = s->scene.torqueMaxLatAccel * 0.1;
+  //   if (live_tune_panel_list == (s->scene.list_count+0)) {
+  //     sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKp*0.1, (s->scene.torqueKp*0.1)/max_lat_accel);
+  //     szTuneName = "TORQUE: Kp";
+  //   } else if (live_tune_panel_list == (s->scene.list_count+1)) {
+  //     sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKf*0.1, (s->scene.torqueKf*0.1)/max_lat_accel);
+  //     szTuneName = "TORQUE: Kf";
+  //   } else if (live_tune_panel_list == (s->scene.list_count+2)) {
+  //     sprintf(szTuneParam, "%0.1f>%0.2f", s->scene.torqueKi*0.1, (s->scene.torqueKi*0.1)/max_lat_accel);
+  //     szTuneName = "TORQUE: Ki";
+  //   } else if (live_tune_panel_list == (s->scene.list_count+3)) {
+  //     sprintf(szTuneParam, "%0.1f", s->scene.torqueMaxLatAccel*0.1);
+  //     szTuneName = "TORQUE: MaxL";
+  //   } else if (live_tune_panel_list == (s->scene.list_count+4)) {
+  //     sprintf(szTuneParam, "%0.3f", s->scene.torqueFriction*0.001);
+  //     szTuneName = "TORQUE: Fric";
+  //   } else if (live_tune_panel_list == (s->scene.list_count+5)) {
+  //     sprintf(szTuneParam, "%0.0f", s->scene.lqrScale*1.0);
+  //     szTuneName = "LQR: Scale";
+  //   } else if (live_tune_panel_list == (s->scene.list_count+6)) {
+  //     sprintf(szTuneParam, "%0.3f", s->scene.lqrKi*0.001);
+  //     szTuneName = "LQR: Ki";
+  //   } else if (live_tune_panel_list == (s->scene.list_count+7)) {
+  //     sprintf(szTuneParam, "%0.5f", s->scene.lqrDcGain*0.00001);
+  //     szTuneName = "LQR: DcGain";
+  //   }
+  // }
 
 
-  if( szTuneName )
-  {
+  if (szTuneName) {
     ui_print(s, s->fb_w/2, y_pos + height/2, "%s", szTuneParam);
     nvgFontSize(s->vg, 120);
-    ui_print(s, s->fb_w/2, y_pos - 95, szTuneName );
+    ui_print(s, s->fb_w/2, y_pos - 95, szTuneName);
   }
-
 
   nvgFillColor(s->vg, nvgRGBA(171,242,0,150));
   nvgFill(s->vg);
