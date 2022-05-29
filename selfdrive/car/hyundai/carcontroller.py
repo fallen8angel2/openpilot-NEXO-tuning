@@ -196,6 +196,7 @@ class CarController():
 
     self.lkas_onoff_counter = 0
     self.lkas_temp_disabled = False
+    self.lkas_temp_disabled_timer = 0
 
     self.str_log2 = 'MultiLateral'
     if CP.lateralTuning.which() == 'pid':
@@ -360,8 +361,18 @@ class CarController():
         if self.lkas_onoff_counter > 100:
           self.lkas_onoff_counter = 0
           self.lkas_temp_disabled = not self.lkas_temp_disabled
+          if self.lkas_temp_disabled:
+            self.lkas_temp_disabled_timer = 0
+          else:
+            self.lkas_temp_disabled_timer = 15
       else:
+        if self.lkas_temp_disabled_timer:
+          self.lkas_temp_disabled_timer -= 1
         self.lkas_onoff_counter = 0
+    else:
+      self.lkas_onoff_counter = 0
+      if self.lkas_temp_disabled_timer:
+        self.lkas_temp_disabled_timer -= 1
 
     can_sends = []
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active and not self.lkas_temp_disabled,
@@ -546,10 +557,14 @@ class CarController():
 
     if not enabled:
       self.cruise_init = False
+      self.lkas_temp_disabled = False
     if CS.cruise_buttons == 4:
       self.cancel_counter += 1
       self.auto_res_starting = False
       self.standstill_res_button = False
+      if self.lkas_temp_disabled:
+        self.lkas_temp_disabled = False
+        self.lkas_temp_disabled_timer = 15
     elif CS.cruise_active:
       self.cruise_init = True
       self.cancel_counter = 0
@@ -566,6 +581,9 @@ class CarController():
       if CS.out.brakeLights:
         self.auto_res_limit_timer = 0
         self.auto_res_delay_timer = 0
+        if CS.out.brakePressed and self.lkas_temp_disabled:
+          self.lkas_temp_disabled = False
+          self.lkas_temp_disabled_timer = 15
       else:
         if self.auto_res_limit_timer < self.auto_res_limit_sec:
           self.auto_res_limit_timer += 1
