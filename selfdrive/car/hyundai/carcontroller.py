@@ -973,4 +973,4 @@ class CarController():
     new_actuators.accel = self.accel
     safetycam_speed = self.NC.safetycam_speed
 
-    return new_actuators, can_sends, safetycam_speed
+    return new_actuators, can_sends, safetycam_speed, self.lkas_temp_disabled
