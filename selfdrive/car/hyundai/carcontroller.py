@@ -196,6 +196,9 @@ class CarController():
     self.fca11supcnt = self.fca11inc = self.fca11alivecnt = self.fca11cnt13 = 0
     self.fca11maxcnt = 0xD
 
+    self.steer_timer_apply_torque = 1.0
+    self.DT_STEER = 0.005             # 0.01 1sec, 0.005  2sec
+
     self.lkas_onoff_counter = 0
     self.lkas_temp_disabled = False
     self.lkas_temp_disabled_timer = 0
@@ -212,6 +215,30 @@ class CarController():
       self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction)
 
     self.sm = messaging.SubMaster(['controlsState', 'radarState', 'longitudinalPlan'])
+
+
+  def smooth_steer( self, apply_torque, CS ):
+
+    if abs(CS.out.steeringAngleDeg) > self.CP.maxSteeringAngleDeg:
+      if CS.out.steeringPressed:
+        self.steer_timer_apply_torque -= 0.002 #self.DT_STEER   # 0.01 1sec, 0.005  2sec   0.002  5sec
+      else:
+        self.steer_timer_apply_torque -= 0.001  # 10 sec
+    elif CS.out.steeringPressed:
+      self.steer_timer_apply_torque -= 0.001
+    else:
+      if self.steer_timer_apply_torque >= 1:
+          return int(round(float(apply_torque)))
+      self.steer_timer_apply_torque += self.DT_STEER
+
+    if self.steer_timer_apply_torque < 0:
+      self.steer_timer_apply_torque = 0
+    elif self.steer_timer_apply_torque > 1:
+      self.steer_timer_apply_torque = 1
+
+    apply_torque *= self.steer_timer_apply_torque
+
+    return  int(round(float(apply_torque)))
 
   def update(self, c, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, v_future, v_future_a):
