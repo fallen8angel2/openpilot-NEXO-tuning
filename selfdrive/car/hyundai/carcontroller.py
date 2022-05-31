@@ -61,6 +61,8 @@ class CarController():
     self.apply_steer_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.steer_rate_limited = False
+    self.lkas11_cnt = 0
+    self.scc12_cnt = 0
     self.counter_init = False
     self.aq_value = 0
     self.aq_value_raw = 0
@@ -375,14 +377,25 @@ class CarController():
         self.lkas_temp_disabled_timer -= 1
 
     can_sends = []
+
+    if frame == 0: # initialize counts from last received count signals
+      self.lkas11_cnt = CS.lkas11["CF_Lkas_MsgCount"] + 1
+      self.scc12_cnt = CS.scc12["CR_VSM_Alive"] + 1 if not CS.no_radar else 0
+    self.lkas11_cnt %= 0x10
+    self.scc12_cnt %= 0xF
+
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active and not self.lkas_temp_disabled,
                                    cut_steer_temp, CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
-                                   left_lane_warning, right_lane_warning, 0, self.ldws_fix))
+                                   left_lane_warning, right_lane_warning, 0, self.ldws_fix, self.lkas11_cnt))
 
-    if CS.CP.mdpsBus: # send lkas11 bus 1 if mdps is bus 1
+    if CS.CP.sccBus: # send lkas11 bus 1 or 2 if scc bus is
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active and not self.lkas_temp_disabled,
                                    cut_steer_temp, CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
-                                   left_lane_warning, right_lane_warning, 1, self.ldws_fix))
+                                   left_lane_warning, right_lane_warning, CS.CP.sccBus, self.ldws_fix, self.lkas11_cnt))
+    elif CS.CP.mdpsBus: # send lkas11 bus 1 if mdps is bus 1
+      can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active and not self.lkas_temp_disabled,
+                                   cut_steer_temp, CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
+                                   left_lane_warning, right_lane_warning, 1, self.ldws_fix, self.lkas11_cnt))
       if frame % 2: # send clu11 to mdps if it is not on bus 0
         can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.NONE, enabled_speed, CS.CP.mdpsBus))
 
@@ -562,9 +575,6 @@ class CarController():
       self.cancel_counter += 1
       self.auto_res_starting = False
       self.standstill_res_button = False
-      if self.lkas_temp_disabled:
-        self.lkas_temp_disabled = False
-        self.lkas_temp_disabled_timer = 15
     elif CS.cruise_active:
       self.cruise_init = True
       self.cancel_counter = 0
@@ -581,9 +591,6 @@ class CarController():
       if CS.out.brakeLights:
         self.auto_res_limit_timer = 0
         self.auto_res_delay_timer = 0
-        if CS.out.brakePressed and self.lkas_temp_disabled:
-          self.lkas_temp_disabled = False
-          self.lkas_temp_disabled_timer = 15
       else:
         if self.auto_res_limit_timer < self.auto_res_limit_sec:
           self.auto_res_limit_timer += 1
@@ -892,10 +899,11 @@ class CarController():
          self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.acc_standstill, self.gapsettingdance, self.stopped, radar_recog, CS.scc11))
         if (CS.brake_check or CS.cancel_check) and self.car_fingerprint != CAR.NIRO_EV_DE:
           can_sends.append(create_scc12(self.packer, accel, enabled, self.scc_live, CS.out.gasPressed, 1, 
-           CS.out.stockAeb, self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.stopped, self.acc_standstill, radar_recog, CS.scc12))
+           CS.out.stockAeb, self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.stopped, self.acc_standstill, radar_recog, self.scc12_cnt, CS.scc12))
         else:
           can_sends.append(create_scc12(self.packer, accel, enabled, self.scc_live, CS.out.gasPressed, CS.out.brakePressed, 
-           CS.out.stockAeb, self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.stopped, self.acc_standstill, radar_recog, CS.scc12))
+           CS.out.stockAeb, self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.stopped, self.acc_standstill, radar_recog, self.scc12_cnt, CS.scc12))
+        self.scc12_cnt += 1
         can_sends.append(create_scc14(self.packer, enabled, CS.scc14, CS.out.stockAeb, lead_visible, self.dRel, 
          CS.out.vEgo, self.acc_standstill, self.car_fingerprint))
         self.accel = accel
@@ -972,5 +980,7 @@ class CarController():
     new_actuators.steer = apply_steer / self.p.STEER_MAX
     new_actuators.accel = self.accel
     safetycam_speed = self.NC.safetycam_speed
+
+    self.lkas11_cnt += 1
 
     return new_actuators, can_sends, safetycam_speed, self.lkas_temp_disabled
