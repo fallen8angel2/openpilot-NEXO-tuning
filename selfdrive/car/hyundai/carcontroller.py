@@ -182,7 +182,7 @@ class CarController():
 
     self.user_specific_feature = int(self.params.get("UserSpecificFeature", encoding="utf8"))
     self.user_specific_feature_on = False
-    self.user_specific_prev_gap = 2.0
+    self.user_specific_prev_gap = 1.0
     self.gap_cnt = 0
 
     self.radar_disabled_conf = self.params.get_bool("RadarDisable")
@@ -218,7 +218,6 @@ class CarController():
 
 
   def smooth_steer( self, apply_torque, CS ):
-
     if abs(CS.out.steeringAngleDeg) > self.CP.maxSteeringAngleDeg:
       if CS.out.steeringPressed:
         self.steer_timer_apply_torque -= 0.002 #self.DT_STEER   # 0.01 1sec, 0.005  2sec   0.002  5sec
@@ -580,12 +579,8 @@ class CarController():
             if self.gap_cnt >= randint(6, 8):
               self.gap_cnt = 0
               self.switch_timer = randint(30, 36)
-          elif (CS.out.leftBlinker or CS.out.rightBlinker) and CS.cruiseGapSet != 2.0 and CS.out.vEgo >= LANE_CHANGE_SPEED_MIN:
-            self.user_specific_prev_gap = CS.cruiseGapSet
-          elif self.user_specific_prev_gap == CS.cruiseGapSet and CS.cruiseGapSet != 2.0 and path_plan.laneChangeState == LaneChangeState.off:
-            self.user_specific_prev_gap = 0
-            self.user_specific_feature_on = False
-          else:
+          elif path_plan.laneChangeState == LaneChangeState.off:
+            self.user_specific_prev_gap = 1.0
             self.user_specific_feature_on = False
     else:
       self.on_speed_control = False

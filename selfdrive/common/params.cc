@@ -158,7 +158,6 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"TrainingVersion", PERSISTENT},
     {"UpdateAvailable", CLEAR_ON_MANAGER_START},
     {"UpdateFailedCount", CLEAR_ON_MANAGER_START},
-    {"UploadRaw", PERSISTENT},
     {"Version", PERSISTENT},
     {"VisionRadarToggle", PERSISTENT},
     {"ApiCache_Device", PERSISTENT},
@@ -241,6 +240,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"LongLogDisplay", PERSISTENT},
     {"OpkrBlindSpotDetect", PERSISTENT},
     {"OpkrMaxAngleLimit", PERSISTENT},
+    {"OpkrMaxSteerAngle", PERSISTENT},
     {"OpkrSpeedLimitOffset", PERSISTENT},
     {"OpkrLiveSteerRatio", PERSISTENT},
     {"OpkrVariableSteerMax", PERSISTENT},
@@ -367,6 +367,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"MultipleLateralSpd", PERSISTENT},
     {"MultipleLateralOpA", PERSISTENT},
     {"MultipleLateralAng", PERSISTENT},
+    {"OnRoadRefresh", CLEAR_ON_MANAGER_START},
 };
 
 } // namespace
