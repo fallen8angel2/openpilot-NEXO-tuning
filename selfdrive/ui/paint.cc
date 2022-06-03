@@ -434,14 +434,14 @@ static void ui_draw_debug(UIState *s) {
           ui_print(s, ui_viz_rx_center, bdr_s+295, szLaCMethod );
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-            ui_print(s, ui_viz_rx_center, bdr_s+330, szLaCMethodCur, 80, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+            ui_print(s, ui_viz_rx_center, bdr_s+335, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     } else {
       if( szLaCMethod )
           ui_print(s, ui_viz_rx_center, bdr_s+320, szLaCMethod );
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-            ui_draw_text(s, ui_viz_rx_center, bdr_s+355, szLaCMethodCur, 80, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+            ui_draw_text(s, ui_viz_rx_center, bdr_s+360, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     }
     nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
