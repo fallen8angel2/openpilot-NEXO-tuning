@@ -428,7 +428,7 @@ static void ui_draw_debug(UIState *s) {
         case  2: szLaCMethodCur = "LQR"; break;
         case  3: szLaCMethodCur = "TORQUE"; break;
       }
-    if ( true ) // !scene.animated_rpm )
+    if ( !scene.animated_rpm )
     {
       if( szLaCMethod )
           ui_print(s, ui_viz_rx_center, bdr_s+295, szLaCMethod );
