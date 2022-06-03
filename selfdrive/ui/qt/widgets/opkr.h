@@ -2366,3 +2366,18 @@ private:
   void refreshl();
   void refreshr();
 };
+
+class StoppingDist : public AbstractControl {
+  Q_OBJECT
+
+public:
+  StoppingDist();
+
+private:
+  QPushButton btnplus;
+  QPushButton btnminus;
+  QLabel label;
+  Params params;
+  
+  void refresh();
+};
