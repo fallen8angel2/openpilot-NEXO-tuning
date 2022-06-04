@@ -440,24 +440,24 @@ static void ui_draw_debug(UIState *s) {
     if ( !scene.animated_rpm )
     {
       if( szLaCMethod )
-        ui_draw_text(s, ui_viz_rx_center, bdr_s+295, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
+        ui_draw_text(s, ui_viz_rx_center, bdr_s+300, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-          ui_draw_text(s, ui_viz_rx_center, bdr_s+335, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+          ui_draw_text(s, ui_viz_rx_center, bdr_s+340, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     } else {
       if( szLaCMethod )
-        ui_draw_text(s, ui_viz_rx_center, bdr_s+320, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
+        ui_draw_text(s, ui_viz_rx_center, bdr_s+325, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-          ui_draw_text(s, ui_viz_rx_center, bdr_s+360, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+          ui_draw_text(s, ui_viz_rx_center, bdr_s+365, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     }
   }
   if (scene.cal_view) {
     nvgFontSize(s->vg, 80);
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-    ui_print(s, ui_viz_rx, ui_viz_ry+760, "BF:%.1f   RL:%.1f°", scene.accel_prob[0], scene.accel_prob[1]);
+    ui_print(s, ui_viz_rx_center, ui_viz_ry_center, "BF:%.1f   RL:%.1f°", scene.accel_prob[0], scene.accel_prob[1]);
   }
 }
 
