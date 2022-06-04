@@ -453,11 +453,11 @@ static void ui_draw_debug(UIState *s) {
           ui_draw_text(s, ui_viz_rx_center, bdr_s+360, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     }
-    nvgFontSize(s->vg, 50);
-    nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
   }
   if (scene.cal_view) {
-    ui_draw_text(s, ui_viz_rx, ui_viz_ry+760, "BF:%.1f   RL:%.1f°", scene.accel_prob[0], scene.accel_prob[1], 80, COLOR_ORANGE_ALPHA(150), "KaiGenGothicKR-Medium");
+    nvgFontSize(s->vg, 80);
+    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+    ui_print(s, ui_viz_rx, ui_viz_ry+760, "BF:%.1f   RL:%.1f°", scene.accel_prob[0], scene.accel_prob[1]);
   }
 }
 
