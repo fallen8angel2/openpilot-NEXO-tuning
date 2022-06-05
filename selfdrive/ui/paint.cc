@@ -419,7 +419,7 @@ static void ui_draw_debug(UIState *s) {
         case  1: szLaCMethod = "INDI"; break;
         case  2: szLaCMethod = "LQR"; break;
         case  3: szLaCMethod = "TORQUE"; break;
-        case  4: szLaCMethod = "MULTI"; break;
+        case  4: szLaCMethod = "MULTI Mode"; break;
       }
     switch( (int)scene.multi_lat_selected  )
       {
@@ -434,14 +434,14 @@ static void ui_draw_debug(UIState *s) {
           ui_print(s, ui_viz_rx_center, bdr_s+295, szLaCMethod );
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-            ui_print(s, ui_viz_rx_center, bdr_s+330, szLaCMethodCur );
+            ui_print(s, ui_viz_rx_center, bdr_s+335, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     } else {
       if( szLaCMethod )
           ui_print(s, ui_viz_rx_center, bdr_s+320, szLaCMethod );
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-            ui_print(s, ui_viz_rx_center, bdr_s+355, szLaCMethodCur );
+            ui_draw_text(s, ui_viz_rx_center, bdr_s+360, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     }
     nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
