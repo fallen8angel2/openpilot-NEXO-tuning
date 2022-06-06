@@ -1569,14 +1569,12 @@ static void ui_draw_blindspot_mon(UIState *s) {
   int car_valid_status = 0;
   bool car_valid_left = scene.leftblindspot;
   bool car_valid_right = scene.rightblindspot;
-  bool car_valid_status_changed = scene.car_valid_status_changed;
-  bool blindspot_blinkingrate = scene.blindspot_blinkingrate;  
   int car_valid_alpha1 = 0;
   int car_valid_alpha2 = 0;
   if (scene.nOpkrBlindSpotDetect) {
-    if (car_valid_status_changed != car_valid_status) {
-      blindspot_blinkingrate = 114;
-      car_valid_status_changed = car_valid_status;
+    if (scene.car_valid_status_changed != car_valid_status) {
+      scene.blindspot_blinkingrate = 114;
+      scene.car_valid_status_changed = car_valid_status;
     }
     if (car_valid_left || car_valid_right) {
       if (!car_valid_left && car_valid_right) {
@@ -1588,9 +1586,9 @@ static void ui_draw_blindspot_mon(UIState *s) {
       } else {
         car_valid_status = 0;
       }
-      blindspot_blinkingrate -= 6;
-      if (blindspot_blinkingrate < 0) blindspot_blinkingrate = 120;
-      if (blindspot_blinkingrate >= 60) {
+      scene.blindspot_blinkingrate -= 6;
+      if (scene.blindspot_blinkingrate < 0) scene.blindspot_blinkingrate = 120;
+      if (scene.blindspot_blinkingrate >= 60) {
         car_valid_alpha1 = 230;
         car_valid_alpha2 = 30;
       } else {
