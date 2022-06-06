@@ -176,7 +176,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   float green_lvl_line = 0;
 
   int car_valid_status = 0;
-  float car_valid_alpha = 230;
+  float car_valid_alpha = 0;
   bool car_valid_left = scene.leftblindspot;
   bool car_valid_right = scene.rightblindspot;
   int car_valid_status_changed2 = 0;
@@ -216,7 +216,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       if (blindspot_blinkingrate2 >= 60) {
         car_valid_alpha = 1.0;
       } else {
-        car_valid_alpha = 0.2;
+        car_valid_alpha = 0;
       }
     } else {
       blindspot_blinkingrate2 = 120;
