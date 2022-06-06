@@ -174,31 +174,66 @@ static void ui_draw_vision_lane_lines(UIState *s) {
 
   float red_lvl_line = 0;
   float green_lvl_line = 0;
-  //if (!scene.end_to_end) {
-  if (!scene.lateralPlan.lanelessModeStatus) {
-    // paint lanelines, Hoya's colored lane line
-    for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
-      if (scene.lane_line_probs[i] > 0.4){
-        red_lvl_line = 1.0 - ((scene.lane_line_probs[i] - 0.4) * 2.5);
-        green_lvl_line = 1.0;
-      } else {
-        red_lvl_line = 1.0;
-        green_lvl_line = 1.0 - ((0.4 - scene.lane_line_probs[i]) * 2.5);
-      }
-      NVGcolor color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1); // nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
-      // if (!scene.comma_stock_ui) {
-      //   color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1);
-      // }
-      ui_draw_line(s, scene.lane_line_vertices[i], &color, nullptr);
-    }
 
-    // paint road edges
-    for (int i = 0; i < std::size(scene.road_edge_vertices); i++) {
-      NVGcolor color = nvgRGBAf(1.0, 0.2, 0.2, std::clamp<float>(1.0 - scene.road_edge_stds[i], 0.0, 1.0));
-      ui_draw_line(s, scene.road_edge_vertices[i], &color, nullptr);
+  int car_valid_status = 0;
+  bool car_valid_left = scene.leftblindspot;
+  bool car_valid_right = scene.rightblindspot;
+  int car_valid_alpha1 = 0;
+  int car_valid_alpha2 = 0;
+
+  // paint lanelines, Hoya's colored lane line
+  for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
+    if (scene.lane_line_probs[i] > 0.4){
+      red_lvl_line = 1.0 - ((scene.lane_line_probs[i] - 0.4) * 2.5);
+      green_lvl_line = 1.0;
+    } else {
+      red_lvl_line = 1.0;
+      green_lvl_line = 1.0 - ((0.4 - scene.lane_line_probs[i]) * 2.5);
+    }
+    NVGcolor color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1); // nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
+    // if (!scene.comma_stock_ui) {
+    //   color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1);
+    // }
+    ui_draw_line(s, scene.lane_line_vertices[i], &color, nullptr);
+  }
+
+  // paint lanelines in case of blind spot
+  if (scene.nOpkrBlindSpotDetect) {
+    if (scene.car_valid_status_changed != car_valid_status) {
+      scene.blindspot_blinkingrate = 114;
+      scene.car_valid_status_changed = car_valid_status;
+    }
+    if (car_valid_left || car_valid_right) {
+      if (!car_valid_left && car_valid_right) {
+        car_valid_status = 1;
+      } else if (car_valid_left && !car_valid_right) {
+        car_valid_status = 2;
+      } else if (car_valid_left && car_valid_right) {
+        car_valid_status = 3;
+      } else {
+        car_valid_status = 0;
+      }
+      scene.blindspot_blinkingrate -= 6;
+    } else {
+      scene.blindspot_blinkingrate = 120;
+    }
+    NVGcolor color = nvgRGBAf(1.0, 0.2, 0.2, 1);
+    if(car_valid_left) { 
+      ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
+    }
+    if(car_valid_right) {
+      ui_draw_line(s, scene.lane_line_vertices[2], &color, nullptr);
     }
   }
-  if (scene.controls_state.getEnabled()) { // && !scene.comma_stock_ui) {
+
+  // paint road edges
+  for (int i = 0; i < std::size(scene.road_edge_vertices); i++) {
+    NVGcolor color = nvgRGBAf(1.0, 0.2, 0.2, std::clamp<float>(1.0 - scene.road_edge_stds[i], 0.0, 1.0));
+    ui_draw_line(s, scene.road_edge_vertices[i], &color, nullptr);
+  }
+
+  // paint track path
+  if (scene.controls_state.getEnabled()) { 
     if (steerOverride) {
       track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
         COLOR_BLACK_ALPHA(80), COLOR_BLACK_ALPHA(20));
@@ -206,7 +241,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       if (!scene.lateralPlan.lanelessModeStatus) {
         track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
           nvgRGBA(red_lvl, green_lvl, 0, 160), nvgRGBA((int)(0.7*red_lvl), (int)(0.7*green_lvl), 0, 30));
-      } else {
+      } else { //laneless status
         track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
           nvgRGBA(red_lvl, 150, green_lvl, 160), nvgRGBA((int)(0.7*red_lvl), 150, (int)(0.7*green_lvl), 30));
       }
@@ -216,7 +251,6 @@ static void ui_draw_vision_lane_lines(UIState *s) {
     track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
                                         COLOR_WHITE_ALPHA(150), COLOR_WHITE_ALPHA(20));
   }
-  // paint path
   ui_draw_line(s, scene.track_vertices, nullptr, &track_bg);
 }
 
