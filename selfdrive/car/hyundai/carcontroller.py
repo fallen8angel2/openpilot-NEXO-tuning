@@ -215,11 +215,11 @@ class CarController():
       self.str_log2 = 'T={:04.0f}/{:05.3f}/{:07.5f}'.format(CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain)
     elif CP.lateralTuning.which() == 'torque':
       self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction)
-    else : #'MultiLateral'
-      self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f} L={:04.0f}/{:05.3f}/{:07.5f} P={:0.2f}/{:0.3f}/{:0.2f}/{:0.5f}'.format( \
-        CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction, \
-        CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain, \
-        CP.lateralTuning.pid.kpV[1], CP.lateralTuning.pid.kiV[1], CP.lateralTuning.pid.kdV[0], CP.lateralTuning.pid.kf)
+    # else : #'MultiLateral'
+    #   self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f} L={:04.0f}/{:05.3f}/{:07.5f} P={:0.2f}/{:0.3f}/{:0.2f}/{:0.5f}'.format( \
+    #     CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction, \
+    #     CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain, \
+    #     CP.lateralTuning.pid.kpV[1], CP.lateralTuning.pid.kiV[1], CP.lateralTuning.pid.kdV[0], CP.lateralTuning.pid.kf)
 
     self.sm = messaging.SubMaster(['controlsState', 'radarState', 'longitudinalPlan'])
 
