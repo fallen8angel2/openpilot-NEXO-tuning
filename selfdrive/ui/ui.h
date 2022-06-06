@@ -180,7 +180,9 @@ typedef struct UIScene {
   int blinker_blinkingrate;
   int tpms_blinkingrate = 120;
   int blindspot_blinkingrate = 120;
+  int blindspot_blinkingrate2 = 120;
   int car_valid_status_changed = 0;
+  int car_valid_status_changed2 = 0;
   float angleSteers;
   float desired_angle_steers;
   float steerRatio;

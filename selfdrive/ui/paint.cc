@@ -179,7 +179,6 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   float car_valid_alpha = 230;
   bool car_valid_left = scene.leftblindspot;
   bool car_valid_right = scene.rightblindspot;
-  bool car_valid_status_changed = scene.car_valid_status_changed;
 
   // paint lanelines, Hoya's colored lane line
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
@@ -196,9 +195,9 @@ static void ui_draw_vision_lane_lines(UIState *s) {
 
   // paint lanelines in case of blind spot
   if (scene.nOpkrBlindSpotDetect) {
-    if (car_valid_status_changed != car_valid_status) {
-      scene.blindspot_blinkingrate = 114;
-      car_valid_status_changed = car_valid_status;
+    if (scene.car_valid_status_changed2 != car_valid_status) {
+      scene.blindspot_blinkingrate2 = 114;
+      car_valid_status_changed2 = car_valid_status;
     }
     if (car_valid_left || car_valid_right) {
       if (!car_valid_left && car_valid_right) {
@@ -210,15 +209,15 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       } else {
         car_valid_status = 0;
       }
-      scene.blindspot_blinkingrate -= 6;
-      if (scene.blindspot_blinkingrate < 0) scene.blindspot_blinkingrate = 120;
-      if (scene.blindspot_blinkingrate >= 60) {
+      scene.blindspot_blinkingrate2 -= 6;
+      if (scene.blindspot_blinkingrate2 < 0) scene.blindspot_blinkingrate2 = 120;
+      if (scene.blindspot_blinkingrate2 >= 60) {
         car_valid_alpha = 1.0;
       } else {
         car_valid_alpha = 0.2;
       }
     } else {
-      scene.blindspot_blinkingrate = 120;
+      scene.blindspot_blinkingrate2 = 120;
     }
     NVGcolor color = nvgRGBAf(1.0, 0.2, 0.2, car_valid_alpha);
     if(car_valid_left) { 
