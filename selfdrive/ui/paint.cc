@@ -195,30 +195,30 @@ static void ui_draw_vision_lane_lines(UIState *s) {
 
   // paint lanelines in case of blind spot
   if (scene.nOpkrBlindSpotDetect) {
-    if (scene.car_valid_status_changed2 != car_valid_status) {
-      scene.blindspot_blinkingrate2 = 114;
-      car_valid_status_changed2 = car_valid_status;
-    }
-    if (car_valid_left || car_valid_right) {
-      if (!car_valid_left && car_valid_right) {
-        car_valid_status = 1;
-      } else if (car_valid_left && !car_valid_right) {
-        car_valid_status = 2;
-      } else if (car_valid_left && car_valid_right) {
-        car_valid_status = 3;
-      } else {
-        car_valid_status = 0;
-      }
-      scene.blindspot_blinkingrate2 -= 6;
-      if (scene.blindspot_blinkingrate2 < 0) scene.blindspot_blinkingrate2 = 120;
-      if (scene.blindspot_blinkingrate2 >= 60) {
-        car_valid_alpha = 1.0;
-      } else {
-        car_valid_alpha = 0.2;
-      }
-    } else {
-      scene.blindspot_blinkingrate2 = 120;
-    }
+    // if (scene.car_valid_status_changed2 != car_valid_status) {
+    //   scene.blindspot_blinkingrate2 = 114;
+    //   car_valid_status_changed2 = car_valid_status;
+    // }
+    // if (car_valid_left || car_valid_right) {
+    //   if (!car_valid_left && car_valid_right) {
+    //     car_valid_status = 1;
+    //   } else if (car_valid_left && !car_valid_right) {
+    //     car_valid_status = 2;
+    //   } else if (car_valid_left && car_valid_right) {
+    //     car_valid_status = 3;
+    //   } else {
+    //     car_valid_status = 0;
+    //   }
+    //   scene.blindspot_blinkingrate2 -= 6;
+    //   if (scene.blindspot_blinkingrate2 < 0) scene.blindspot_blinkingrate2 = 120;
+    //   if (scene.blindspot_blinkingrate2 >= 60) {
+    //     car_valid_alpha = 1.0;
+    //   } else {
+    //     car_valid_alpha = 0.2;
+    //   }
+    // } else {
+    //   scene.blindspot_blinkingrate2 = 120;
+    // }
     NVGcolor color = nvgRGBAf(1.0, 0.2, 0.2, car_valid_alpha);
     if(car_valid_left) { 
       ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
