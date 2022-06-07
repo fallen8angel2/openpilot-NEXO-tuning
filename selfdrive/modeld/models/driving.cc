@@ -302,33 +302,6 @@ void fill_road_edges(cereal::ModelDataV2::Builder &framed, const std::array<floa
   });
 }
 
-// void fill_side_plan(cereal::ModelDataV2::Builder &framed, const std::array<float, TRAJECTORY_SIZE> &plan_t,
-//                      const ModelOutputLaneLines &lanes, const ModelOutputRoadEdges &edges) {
-
-//   std::array<float, TRAJECTORY_SIZE> left_side_y, left_side_z;
-//   std::array<float, TRAJECTORY_SIZE> right_side_y, right_side_z;
-//   for (int j=0; j<TRAJECTORY_SIZE; j++) {
-//     left_side_y[j] = (lanes.mean.left_near[j].y + edges.mean.left[j].y) / 2;
-//     left_side_z[j] = (lanes.mean.left_near[j].z + edges.mean.left[j].z) / 2;
-//     right_side_y[j] = (lanes.mean.right_near[j].y + edges.mean.right[j].y) / 2;
-//     right_side_z[j] = (lanes.mean.right_near[j].z + edges.mean.right[j].z) / 2;
-//   }
-
-//   auto side_lane_lines = framed.initSideLaneLines(2);
-//   fill_xyzt(side_lane_lines[0], plan_t, X_IDXS_FLOAT, left_side_y, left_side_z);
-//   fill_xyzt(side_lane_lines[1], plan_t, X_IDXS_FLOAT, right_side_y, right_side_z);
-
-//   framed.setSideLaneLineStds({
-//     exp(lanes.std.left_side[0].y),
-//     exp(lanes.std.right_side[0].y),
-//   });
-
-//   // framed.setSideLaneLineProbs({
-//   //   sigmoid(lanes.prob.left_side.val),
-//   //   sigmoid(lanes.prob.right_side.val),
-//   // });
-// }
-
 void fill_model(cereal::ModelDataV2::Builder &framed, const ModelOutput &net_outputs) {
   const auto &best_plan = net_outputs.plans.get_best_prediction();
   std::array<float, TRAJECTORY_SIZE> plan_t;
@@ -353,7 +326,6 @@ void fill_model(cereal::ModelDataV2::Builder &framed, const ModelOutput &net_out
   }
 
   fill_plan(framed, best_plan);
-  // fill_side_plan(framed, plan_t, net_outputs.side_lane_lines);
   fill_lane_lines(framed, plan_t, net_outputs.lane_lines);
   fill_road_edges(framed, plan_t, net_outputs.road_edges);
 
