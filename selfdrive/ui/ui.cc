@@ -68,6 +68,22 @@ static void update_line_data(const UIState *s, const cereal::ModelDataV2::XYZTDa
   assert(pvd->cnt <= std::size(pvd->v));
 }
 
+static void update_side_lane_data(const UIState *s, const cereal::ModelDataV2::XYZTData::Reader &line,
+                             float y_off, float z_off, line_vertices_data *pvd, int max_idx) {
+  const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
+  vertex_data *v = &pvd->v[0];
+  if (&scene.leftblindspot) {
+    for (int i = 0; i <= max_idx; i++) {
+      v += calib_frame_to_full_frame(s, line_x[i], line_y[i] - y_off, line_z[i] + z_off, v);
+    }
+  } else if (&scene.rightblindspot)
+    for (int i = max_idx; i >= 0; i--) {
+      v += calib_frame_to_full_frame(s, line_x[i], line_y[i] + y_off, line_z[i] + z_off, v);
+    }
+  pvd->cnt = v - pvd->v;
+  assert(pvd->cnt <= std::size(pvd->v));
+}
+
 static void update_stop_line_data(const UIState *s, const cereal::ModelDataV2::StopLineData::Reader &line,
                                   float x_off, float y_off, float z_off, line_vertices_data *pvd) {
   const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
@@ -93,6 +109,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
     scene.lane_line_probs[i] = lane_line_probs[i];
     update_line_data(s, lane_lines[i], 0.1 * scene.lane_line_probs[i], 0, &scene.lane_line_vertices[i], max_idx);
+    update_side_lane_data(s, lane_lines[i], 1.0 * scene.lane_line_probs[i], 0, &scene.lane_line_vertices[i], max_idx);
   }
 
   // update road edges

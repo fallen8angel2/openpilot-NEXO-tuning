@@ -1998,7 +1998,7 @@ static void ui_draw_vision(UIState *s) {
   ui_draw_vision_header(s);
   if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
     ui_draw_vision_face(s);
-    if (!scene->comma_stock_ui) {
+    if (false) { //!scene->comma_stock_ui) {
       ui_draw_blindspot_mon(s);
     }
   }
