@@ -165,7 +165,7 @@ static void ui_draw_stop_line(UIState *s, const cereal::ModelDataV2::StopLineDat
 }
 
 static void ui_draw_vision_lane_lines(UIState *s) {
-  const UIScene &scene = s->scene;
+  UIScene &scene = s->scene;
   NVGpaint track_bg;
   int steerOverride = scene.car_state.getSteeringPressed();
   int torque_scale = (int)fabs(255*(float)scene.output_scale*0.9);
