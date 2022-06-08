@@ -221,12 +221,19 @@ static void ui_draw_vision_lane_lines(UIState *s) {
     } else {
       scene.blindspot_blinkingrate2 = 120;
     }
-    NVGcolor color = nvgRGBAf(1.0, 0.2, 0.2, car_valid_alpha);
     if(car_valid_left) { 
-      ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
+      // ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
+      // for (int i = 0; i < std::size(scene.left_blindspot_vertices); i++) {
+        NVGcolor color = nvgRGBAf(1.0, 0.0, 0.0, std::clamp<float>(1.0 - scene.road_edge_stds[0], 0.0, 1.0));
+        ui_draw_line(s, scene.left_blindspot_vertices[1], &color, nullptr);
+      // }
     }
     if(car_valid_right) {
-      ui_draw_line(s, scene.lane_line_vertices[2], &color, nullptr);
+      // ui_draw_line(s, scene.lane_line_vertices[2], &color, nullptr);
+      // for (int i = 0; i < std::size(scene.right_blindspot_vertices); i++) {
+        NVGcolor color = nvgRGBAf(1.0, 0.0, 0.0, std::clamp<float>(1.0 - scene.road_edge_stds[1], 0.0, 1.0));
+        ui_draw_line(s, scene.right_blindspot_vertices[0], &color, nullptr);
+      // }      
     }
   }
 
@@ -1998,7 +2005,7 @@ static void ui_draw_vision(UIState *s) {
   ui_draw_vision_header(s);
   if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
     ui_draw_vision_face(s);
-    if (!scene->comma_stock_ui) {
+    if (false) { //!scene->comma_stock_ui) {
       ui_draw_blindspot_mon(s);
     }
   }

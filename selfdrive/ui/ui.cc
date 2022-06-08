@@ -68,6 +68,20 @@ static void update_line_data(const UIState *s, const cereal::ModelDataV2::XYZTDa
   assert(pvd->cnt <= std::size(pvd->v));
 }
 
+static void update_blindspot_data(const UIState *s, const cereal::ModelDataV2::XYZTData::Reader &line,
+                             float y_off1, float y_off2, float z_off, line_vertices_data *pvd, int max_idx ) {
+  const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
+  vertex_data *v = &pvd->v[0];
+  for (int i = 0; i <= max_idx; i++) {
+    v += calib_frame_to_full_frame(s, line_x[i], line_y[i] - y_off1, line_z[i] + z_off, v);
+  }
+  for (int i = max_idx; i >= 0; i--) {
+    v += calib_frame_to_full_frame(s, line_x[i], line_y[i] + y_off2, line_z[i] + z_off, v);
+  }
+  pvd->cnt = v - pvd->v;
+  assert(pvd->cnt <= std::size(pvd->v));
+}
+
 static void update_stop_line_data(const UIState *s, const cereal::ModelDataV2::StopLineData::Reader &line,
                                   float x_off, float y_off, float z_off, line_vertices_data *pvd) {
   const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
@@ -92,7 +106,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   int max_idx = get_path_length_idx(lane_lines[0], max_distance);
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
     scene.lane_line_probs[i] = lane_line_probs[i];
-    update_line_data(s, lane_lines[i], 0.05 * scene.lane_line_probs[i], 0, &scene.lane_line_vertices[i], max_idx);
+    update_line_data(s, lane_lines[i], 0.1 * scene.lane_line_probs[i], 0, &scene.lane_line_vertices[i], max_idx);
   }
 
   // update road edges
@@ -111,6 +125,17 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   }
   max_idx = get_path_length_idx(model_position, max_distance);
   update_line_data(s, model_position, 1.0, 1.22, &scene.track_vertices, max_idx);
+
+   // update blindspot line
+  // for (int i = 0; i < std::size(scene.left_blindspot_vertices); i++) {
+  scene.left_blindspot_probs[1] = lane_line_probs[1];
+  update_blindspot_data(s, lane_lines[1], 2.5 * scene.left_blindspot_probs[1], 0, 0, &scene.left_blindspot_vertices[1], max_idx);
+  // }   
+  // for (int i = 0; i < std::size(scene.right_blindspot_vertices); i++) {
+  scene.right_blindspot_probs[0] = lane_line_probs[2];
+  update_blindspot_data(s, lane_lines[2], 0, 2.5 * scene.right_blindspot_probs[0], 0, &scene.right_blindspot_vertices[0], max_idx);
+  // }   
+
 
   // update stop lines
   if (scene.stop_line) {
