@@ -70,13 +70,14 @@ static void update_line_data(const UIState *s, const cereal::ModelDataV2::XYZTDa
 
 static void update_side_lane_data(const UIState *s, const cereal::ModelDataV2::XYZTData::Reader &line,
                              float y_off, float z_off, line_vertices_data *pvd, int max_idx) {
+  UIScene &scene = s->scene;
   const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
   vertex_data *v = &pvd->v[0];
-  if (&scene.leftblindspot) {
+  if (scene.leftblindspot) {
     for (int i = 0; i <= max_idx; i++) {
       v += calib_frame_to_full_frame(s, line_x[i], line_y[i] - y_off, line_z[i] + z_off, v);
     }
-  } else if (&scene.rightblindspot)
+  } else if (scene.rightblindspot)
     for (int i = max_idx; i >= 0; i--) {
       v += calib_frame_to_full_frame(s, line_x[i], line_y[i] + y_off, line_z[i] + z_off, v);
     }
