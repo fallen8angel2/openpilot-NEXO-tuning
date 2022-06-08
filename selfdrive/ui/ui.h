@@ -281,6 +281,9 @@ typedef struct UIScene {
   line_vertices_data road_edge_vertices[2];
   line_vertices_data lane_blindspot_vertices[2];
   line_vertices_data stop_line_vertices;
+
+  bool dm_active, engageable;
+
   // lead
   vertex_data lead_vertices[2];
 
