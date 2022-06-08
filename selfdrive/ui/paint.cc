@@ -220,11 +220,11 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       scene.blindspot_blinkingrate2 = 120;
     }
     if(car_valid_left) { 
-        NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, car_valid_alpha);
+        NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, 0.8);
         ui_draw_line(s, scene.lane_blindspot_vertices[0], &color, nullptr);
     }
     if(car_valid_right) {
-        NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, car_valid_alpha);
+        NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, 0.8);
         ui_draw_line(s, scene.lane_blindspot_vertices[1], &color, nullptr);
     }
   }
@@ -1556,63 +1556,63 @@ static void ui_draw_vision_header(UIState *s) {
 }
 
 //blind spot warning by OPKR and modified gradient color by Hoya
-static void ui_draw_blindspot_mon(UIState *s) {
-  NVGpaint gradient_blindspot;  
-  UIScene &scene = s->scene;
-  const int width = 600;
-  const int height = s->fb_h;
+// static void ui_draw_blindspot_mon(UIState *s) {
+//   NVGpaint gradient_blindspot;  
+//   UIScene &scene = s->scene;
+//   const int width = 600;
+//   const int height = s->fb_h;
 
-  const int left_x = 0;
-  const int left_y = 0;
-  const int right_x = s->fb_w - width;
-  const int right_y = 0;
+//   const int left_x = 0;
+//   const int left_y = 0;
+//   const int right_x = s->fb_w - width;
+//   const int right_y = 0;
 
-  const Rect rect_l = {left_x, left_y, width, height};
-  const Rect rect_r = {right_x, right_y, width, height};
+//   const Rect rect_l = {left_x, left_y, width, height};
+//   const Rect rect_r = {right_x, right_y, width, height};
 
-  int car_valid_status = 0;
-  bool car_valid_left = scene.leftblindspot;
-  bool car_valid_right = scene.rightblindspot;
-  int car_valid_alpha1 = 0;
-  int car_valid_alpha2 = 0;
-  if (scene.nOpkrBlindSpotDetect) {
-    if (scene.car_valid_status_changed != car_valid_status) {
-      scene.blindspot_blinkingrate = 114;
-      scene.car_valid_status_changed = car_valid_status;
-    }
-    if (car_valid_left || car_valid_right) {
-      if (!car_valid_left && car_valid_right) {
-        car_valid_status = 1;
-      } else if (car_valid_left && !car_valid_right) {
-        car_valid_status = 2;
-      } else if (car_valid_left && car_valid_right) {
-        car_valid_status = 3;
-      } else {
-        car_valid_status = 0;
-      }
-      scene.blindspot_blinkingrate -= 6;
-      if (scene.blindspot_blinkingrate < 0) scene.blindspot_blinkingrate = 120;
-      if (scene.blindspot_blinkingrate >= 60) {
-        car_valid_alpha1 = 230;
-        car_valid_alpha2 = 30;
-      } else {
-        car_valid_alpha1 = 80;
-        car_valid_alpha2 = 10;
-      }
-    } else {
-      scene.blindspot_blinkingrate = 120;
-    }
+//   int car_valid_status = 0;
+//   bool car_valid_left = scene.leftblindspot;
+//   bool car_valid_right = scene.rightblindspot;
+//   int car_valid_alpha1 = 0;
+//   int car_valid_alpha2 = 0;
+//   if (scene.nOpkrBlindSpotDetect) {
+//     if (scene.car_valid_status_changed != car_valid_status) {
+//       scene.blindspot_blinkingrate = 114;
+//       scene.car_valid_status_changed = car_valid_status;
+//     }
+//     if (car_valid_left || car_valid_right) {
+//       if (!car_valid_left && car_valid_right) {
+//         car_valid_status = 1;
+//       } else if (car_valid_left && !car_valid_right) {
+//         car_valid_status = 2;
+//       } else if (car_valid_left && car_valid_right) {
+//         car_valid_status = 3;
+//       } else {
+//         car_valid_status = 0;
+//       }
+//       scene.blindspot_blinkingrate -= 6;
+//       if (scene.blindspot_blinkingrate < 0) scene.blindspot_blinkingrate = 120;
+//       if (scene.blindspot_blinkingrate >= 60) {
+//         car_valid_alpha1 = 230;
+//         car_valid_alpha2 = 30;
+//       } else {
+//         car_valid_alpha1 = 80;
+//         car_valid_alpha2 = 10;
+//       }
+//     } else {
+//       scene.blindspot_blinkingrate = 120;
+//     }
 
-    if(car_valid_left) {
-      gradient_blindspot = nvgLinearGradient(s->vg, left_x, left_y + height, width, height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
-      ui_fill_rect(s->vg, rect_l, gradient_blindspot, 0);
-    }
-    if(car_valid_right) {
-      gradient_blindspot = nvgLinearGradient(s->vg, right_x + width, height, right_x , height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
-      ui_fill_rect(s->vg, rect_r, gradient_blindspot, 0);
-    }
-  }
-}
+//     if(car_valid_left) {
+//       gradient_blindspot = nvgLinearGradient(s->vg, left_x, left_y + height, width, height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
+//       ui_fill_rect(s->vg, rect_l, gradient_blindspot, 0);
+//     }
+//     if(car_valid_right) {
+//       gradient_blindspot = nvgLinearGradient(s->vg, right_x + width, height, right_x , height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
+//       ui_fill_rect(s->vg, rect_r, gradient_blindspot, 0);
+//     }
+//   }
+// }
 
 // draw date/time/streetname
 void draw_datetime_osm_info_text(UIState *s) {
@@ -1997,9 +1997,9 @@ static void ui_draw_vision(UIState *s) {
   ui_draw_vision_header(s);
   if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
     ui_draw_vision_face(s);
-    if (false) { //!scene->comma_stock_ui) {
-      ui_draw_blindspot_mon(s);
-    }
+    // if (false) { //!scene->comma_stock_ui) {
+    //   ui_draw_blindspot_mon(s);
+    // }
   }
   if (scene->live_tune_panel_enable) {
     ui_draw_live_tune_panel(s);
