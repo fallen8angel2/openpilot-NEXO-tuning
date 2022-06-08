@@ -179,8 +179,6 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   float car_valid_alpha = 0.0;
   bool car_valid_left = scene.leftblindspot;
   bool car_valid_right = scene.rightblindspot;
-  // int car_valid_status_changed2 = 0;
-  // int blindspot_blinkingrate2 = 120;
 
   // paint lanelines, Hoya's colored lane line
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
@@ -191,7 +189,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       red_lvl_line = 1.0;
       green_lvl_line = 1.0 - ((0.4 - scene.lane_line_probs[i]) * 2.5);
     }
-    NVGcolor color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1); // nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
+    NVGcolor color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1); 
     ui_draw_line(s, scene.lane_line_vertices[i], &color, nullptr);
   }
 
@@ -223,11 +221,11 @@ static void ui_draw_vision_lane_lines(UIState *s) {
     }
     if(car_valid_left) { 
         NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, car_valid_alpha);
-        ui_draw_line(s, scene.left_blindspot_vertices[1], &color, nullptr);
+        ui_draw_line(s, scene.lane_blindspot_vertices[0], &color, nullptr);
     }
     if(car_valid_right) {
         NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, car_valid_alpha);
-        ui_draw_line(s, scene.right_blindspot_vertices[0], &color, nullptr);
+        ui_draw_line(s, scene.lane_blindspot_vertices[1], &color, nullptr);
     }
   }
 
