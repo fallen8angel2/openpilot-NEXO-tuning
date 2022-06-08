@@ -165,7 +165,7 @@ static void ui_draw_stop_line(UIState *s, const cereal::ModelDataV2::StopLineDat
 }
 
 static void ui_draw_vision_lane_lines(UIState *s) {
-  const UIScene &scene = s->scene;
+  UIScene &scene = s->scene;
   NVGpaint track_bg;
   int steerOverride = scene.car_state.getSteeringPressed();
   int torque_scale = (int)fabs(255*(float)scene.output_scale*0.9);
@@ -176,11 +176,11 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   float green_lvl_line = 0;
 
   int car_valid_status = 0;
-  float car_valid_alpha = 0;
+  float car_valid_alpha = 0.0;
   bool car_valid_left = scene.leftblindspot;
   bool car_valid_right = scene.rightblindspot;
-  int car_valid_status_changed2 = 0;
-  int blindspot_blinkingrate2 = 120;
+  // int car_valid_status_changed2 = 0;
+  // int blindspot_blinkingrate2 = 120;
 
   // paint lanelines, Hoya's colored lane line
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
@@ -197,9 +197,9 @@ static void ui_draw_vision_lane_lines(UIState *s) {
 
   // paint red lanelines in case of blind spot
   if (scene.nOpkrBlindSpotDetect) {
-    if (car_valid_status_changed2 != car_valid_status) {
-      blindspot_blinkingrate2 = 114;
-      car_valid_status_changed2 = car_valid_status;
+    if (scene.car_valid_status_changed2 != car_valid_status) {
+      scene.blindspot_blinkingrate2 = 114;
+      scene.car_valid_status_changed2 = car_valid_status;
     }
     if (car_valid_left || car_valid_right) {
       if (!car_valid_left && car_valid_right) {
@@ -211,15 +211,15 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       } else {
         car_valid_status = 0;
       }
-      blindspot_blinkingrate2 -= 6;
-      if (blindspot_blinkingrate2 < 0) blindspot_blinkingrate2 = 120;
-      if (blindspot_blinkingrate2 >= 60) {
+      scene.blindspot_blinkingrate2 -= 6;
+      if (scene.blindspot_blinkingrate2 < 0) scene.blindspot_blinkingrate2 = 120;
+      if (scene.blindspot_blinkingrate2 >= 60) {
         car_valid_alpha = 1.0;
       } else {
         car_valid_alpha = 0;
       }
     } else {
-      blindspot_blinkingrate2 = 120;
+      scene.blindspot_blinkingrate2 = 120;
     }
     NVGcolor color = nvgRGBAf(1.0, 0.2, 0.2, car_valid_alpha);
     if(car_valid_left) { 
