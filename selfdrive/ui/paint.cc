@@ -194,7 +194,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   }
 
   // paint red lanelines in case of blind spot
-  if (scene.nOpkrBlindSpotDetect) {
+  if (scene.nOpkrBlindSpotDetect && scene.comma_stock_ui) {
     if (scene.car_valid_status_changed2 != car_valid_status) {
       scene.blindspot_blinkingrate2 = 114;
       scene.car_valid_status_changed2 = car_valid_status;
@@ -221,10 +221,12 @@ static void ui_draw_vision_lane_lines(UIState *s) {
     }
     if(car_valid_left) { 
         NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, 0.8);
+        ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
         ui_draw_line(s, scene.lane_blindspot_vertices[0], &color, nullptr);
     }
     if(car_valid_right) {
         NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, 0.8);
+        ui_draw_line(s, scene.lane_line_vertices[2], &color, nullptr);
         ui_draw_line(s, scene.lane_blindspot_vertices[1], &color, nullptr);
     }
   }
