@@ -179,8 +179,6 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   float car_valid_alpha = 0.0;
   bool car_valid_left = scene.leftblindspot;
   bool car_valid_right = scene.rightblindspot;
-  // int car_valid_status_changed2 = 0;
-  // int blindspot_blinkingrate2 = 120;
 
   // paint lanelines, Hoya's colored lane line
   for (int i = 0; i < std::size(scene.lane_line_vertices); i++) {
@@ -191,7 +189,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       red_lvl_line = 1.0;
       green_lvl_line = 1.0 - ((0.4 - scene.lane_line_probs[i]) * 2.5);
     }
-    NVGcolor color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1); // nvgRGBAf(1.0, 1.0, 1.0, scene.lane_line_probs[i]);
+    NVGcolor color = nvgRGBAf(red_lvl_line, green_lvl_line, 0, 1); 
     ui_draw_line(s, scene.lane_line_vertices[i], &color, nullptr);
   }
 
@@ -222,18 +220,12 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       scene.blindspot_blinkingrate2 = 120;
     }
     if(car_valid_left) { 
-      // ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
-      // for (int i = 0; i < std::size(scene.left_blindspot_vertices); i++) {
-        NVGcolor color = nvgRGBAf(1.0, 0.0, 0.0, std::clamp<float>(1.0 - scene.road_edge_stds[0], 0.0, 1.0));
-        ui_draw_line(s, scene.left_blindspot_vertices[1], &color, nullptr);
-      // }
+        NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, 0.8);
+        ui_draw_line(s, scene.lane_blindspot_vertices[0], &color, nullptr);
     }
     if(car_valid_right) {
-      // ui_draw_line(s, scene.lane_line_vertices[2], &color, nullptr);
-      // for (int i = 0; i < std::size(scene.right_blindspot_vertices); i++) {
-        NVGcolor color = nvgRGBAf(1.0, 0.0, 0.0, std::clamp<float>(1.0 - scene.road_edge_stds[1], 0.0, 1.0));
-        ui_draw_line(s, scene.right_blindspot_vertices[0], &color, nullptr);
-      // }      
+        NVGcolor color = nvgRGBAf(0.9, 0.2, 0.2, 0.8);
+        ui_draw_line(s, scene.lane_blindspot_vertices[1], &color, nullptr);
     }
   }
 
@@ -1564,63 +1556,63 @@ static void ui_draw_vision_header(UIState *s) {
 }
 
 //blind spot warning by OPKR and modified gradient color by Hoya
-static void ui_draw_blindspot_mon(UIState *s) {
-  NVGpaint gradient_blindspot;  
-  UIScene &scene = s->scene;
-  const int width = 600;
-  const int height = s->fb_h;
+// static void ui_draw_blindspot_mon(UIState *s) {
+//   NVGpaint gradient_blindspot;  
+//   UIScene &scene = s->scene;
+//   const int width = 600;
+//   const int height = s->fb_h;
 
-  const int left_x = 0;
-  const int left_y = 0;
-  const int right_x = s->fb_w - width;
-  const int right_y = 0;
+//   const int left_x = 0;
+//   const int left_y = 0;
+//   const int right_x = s->fb_w - width;
+//   const int right_y = 0;
 
-  const Rect rect_l = {left_x, left_y, width, height};
-  const Rect rect_r = {right_x, right_y, width, height};
+//   const Rect rect_l = {left_x, left_y, width, height};
+//   const Rect rect_r = {right_x, right_y, width, height};
 
-  int car_valid_status = 0;
-  bool car_valid_left = scene.leftblindspot;
-  bool car_valid_right = scene.rightblindspot;
-  int car_valid_alpha1 = 0;
-  int car_valid_alpha2 = 0;
-  if (scene.nOpkrBlindSpotDetect) {
-    if (scene.car_valid_status_changed != car_valid_status) {
-      scene.blindspot_blinkingrate = 114;
-      scene.car_valid_status_changed = car_valid_status;
-    }
-    if (car_valid_left || car_valid_right) {
-      if (!car_valid_left && car_valid_right) {
-        car_valid_status = 1;
-      } else if (car_valid_left && !car_valid_right) {
-        car_valid_status = 2;
-      } else if (car_valid_left && car_valid_right) {
-        car_valid_status = 3;
-      } else {
-        car_valid_status = 0;
-      }
-      scene.blindspot_blinkingrate -= 6;
-      if (scene.blindspot_blinkingrate < 0) scene.blindspot_blinkingrate = 120;
-      if (scene.blindspot_blinkingrate >= 60) {
-        car_valid_alpha1 = 230;
-        car_valid_alpha2 = 30;
-      } else {
-        car_valid_alpha1 = 80;
-        car_valid_alpha2 = 10;
-      }
-    } else {
-      scene.blindspot_blinkingrate = 120;
-    }
+//   int car_valid_status = 0;
+//   bool car_valid_left = scene.leftblindspot;
+//   bool car_valid_right = scene.rightblindspot;
+//   int car_valid_alpha1 = 0;
+//   int car_valid_alpha2 = 0;
+//   if (scene.nOpkrBlindSpotDetect) {
+//     if (scene.car_valid_status_changed != car_valid_status) {
+//       scene.blindspot_blinkingrate = 114;
+//       scene.car_valid_status_changed = car_valid_status;
+//     }
+//     if (car_valid_left || car_valid_right) {
+//       if (!car_valid_left && car_valid_right) {
+//         car_valid_status = 1;
+//       } else if (car_valid_left && !car_valid_right) {
+//         car_valid_status = 2;
+//       } else if (car_valid_left && car_valid_right) {
+//         car_valid_status = 3;
+//       } else {
+//         car_valid_status = 0;
+//       }
+//       scene.blindspot_blinkingrate -= 6;
+//       if (scene.blindspot_blinkingrate < 0) scene.blindspot_blinkingrate = 120;
+//       if (scene.blindspot_blinkingrate >= 60) {
+//         car_valid_alpha1 = 230;
+//         car_valid_alpha2 = 30;
+//       } else {
+//         car_valid_alpha1 = 80;
+//         car_valid_alpha2 = 10;
+//       }
+//     } else {
+//       scene.blindspot_blinkingrate = 120;
+//     }
 
-    if(car_valid_left) {
-      gradient_blindspot = nvgLinearGradient(s->vg, left_x, left_y + height, width, height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
-      ui_fill_rect(s->vg, rect_l, gradient_blindspot, 0);
-    }
-    if(car_valid_right) {
-      gradient_blindspot = nvgLinearGradient(s->vg, right_x + width, height, right_x , height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
-      ui_fill_rect(s->vg, rect_r, gradient_blindspot, 0);
-    }
-  }
-}
+//     if(car_valid_left) {
+//       gradient_blindspot = nvgLinearGradient(s->vg, left_x, left_y + height, width, height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
+//       ui_fill_rect(s->vg, rect_l, gradient_blindspot, 0);
+//     }
+//     if(car_valid_right) {
+//       gradient_blindspot = nvgLinearGradient(s->vg, right_x + width, height, right_x , height / 2, COLOR_RED_ALPHA(car_valid_alpha1), COLOR_RED_ALPHA(car_valid_alpha2));
+//       ui_fill_rect(s->vg, rect_r, gradient_blindspot, 0);
+//     }
+//   }
+// }
 
 // draw date/time/streetname
 void draw_datetime_osm_info_text(UIState *s) {
@@ -2005,9 +1997,9 @@ static void ui_draw_vision(UIState *s) {
   ui_draw_vision_header(s);
   if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
     ui_draw_vision_face(s);
-    if (false) { //!scene->comma_stock_ui) {
-      ui_draw_blindspot_mon(s);
-    }
+    // if (false) { //!scene->comma_stock_ui) {
+    //   ui_draw_blindspot_mon(s);
+    // }
   }
   if (scene->live_tune_panel_enable) {
     ui_draw_live_tune_panel(s);
