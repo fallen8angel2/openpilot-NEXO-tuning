@@ -823,8 +823,11 @@ public:
   BranchSelectCombo();
 
 private:
+  QPushButton btn;
   QComboBox combobox;
   Params params;
+
+  void refresh();
 };
 
 class TimeZoneSelectCombo : public AbstractControl 
