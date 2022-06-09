@@ -194,7 +194,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   }
 
   // paint red lanelines in case of blind spot
-  if (scene.nOpkrBlindSpotDetect && scene.comma_stock_ui) {
+  if (scene.nOpkrBlindSpotDetect && !scene.comma_stock_ui) {
     if (scene.car_valid_status_changed2 != car_valid_status) {
       scene.blindspot_blinkingrate2 = 114;
       scene.car_valid_status_changed2 = car_valid_status;
