@@ -42,7 +42,6 @@ class LatControlTorque(LatControl):
     self.friction = CP.lateralTuning.torque.friction
 
     self.live_tune_enabled = False
-
     self.lt_timer = 0
 
     self.steering_angle_deadzone_deg = CP.lateralTuning.torque.steeringAngleDeadzoneDeg
