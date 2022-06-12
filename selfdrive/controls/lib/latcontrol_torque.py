@@ -59,7 +59,7 @@ class LatControlTorque(LatControl):
                               k_f=self.kf, pos_limit=1.0, neg_limit=-1.0)
         
       self.mpc_frame = 0
-      self.steering_angle_deadzone_deg = CP.lateralTuning.torque.steeringAngleDeadzoneDeg
+      #self.steering_angle_deadzone_deg = CP.lateralTuning.torque.steeringAngleDeadzoneDeg
 
   def update(self, active, CS, CP, VM, params, last_actuators, desired_curvature, desired_curvature_rate, llk):
     self.lt_timer += 1
