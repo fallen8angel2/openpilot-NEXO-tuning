@@ -176,16 +176,22 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   float green_lvl_line = 0;
 
   // paint blindspot path
-  NVGcolor color;
+  // NVGcolor color;
+  track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
+                              COLOR_RED_ALPHA(180), COLOR_RED_ALPHA(20));
   if( scene.leftblindspot ) {
-    color = nvgRGBAf(0.8, 0.1, 0.1, std::clamp<float>(1.0 - scene.lane_blindspot_probs[0], 0.0, 0.8));
-    ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
-    ui_draw_line(s, scene.lane_blindspot_vertices[0], &color, nullptr);
-   }
+    // color = nvgRGBAf(0.8, 0.1, 0.1, std::clamp<float>(1.0 - scene.lane_blindspot_probs[0], 0.0, 0.8));
+    // ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
+    // ui_draw_line(s, scene.lane_blindspot_vertices[0], &color, nullptr);
+    ui_draw_line(s, scene.lane_line_vertices[1], nullptr, &track_bg);
+    ui_draw_line(s, scene.lane_blindspot_vertices[0], nullptr, &track_bg);
+  }
   if( scene.rightblindspot ) {
-    color = nvgRGBAf(0.8, 0.1, 0.1, std::clamp<float>(1.0 - scene.lane_blindspot_probs[1], 0.0, 0.8));
-    ui_draw_line(s, scene.lane_line_vertices[2], &color, nullptr);
-    ui_draw_line(s, scene.lane_blindspot_vertices[1], &color, nullptr);
+    // color = nvgRGBAf(0.8, 0.1, 0.1, std::clamp<float>(1.0 - scene.lane_blindspot_probs[1], 0.0, 0.8));
+    // ui_draw_line(s, scene.lane_line_vertices[2], &color, nullptr);
+    // ui_draw_line(s, scene.lane_blindspot_vertices[1], &color, nullptr);
+    ui_draw_line(s, scene.lane_line_vertices[2], nullptr, &track_bg);
+    ui_draw_line(s, scene.lane_blindspot_vertices[1], nullptr, &track_bg);
   }
 
   if (!scene.lateralPlan.lanelessModeStatus) {
