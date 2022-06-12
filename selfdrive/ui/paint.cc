@@ -176,9 +176,9 @@ static void ui_draw_vision_lane_lines(UIState *s) {
   float green_lvl_line = 0;
 
   // paint blindspot path
-  // NVGcolor color;
+  NVGcolor color;
   track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
-                              COLOR_RED_ALPHA(180), COLOR_RED_ALPHA(20));
+                               COLOR_RED_ALPHA(180), COLOR_RED_ALPHA(1));
   if( scene.leftblindspot ) {
     // color = nvgRGBAf(0.8, 0.1, 0.1, std::clamp<float>(1.0 - scene.lane_blindspot_probs[0], 0.0, 0.8));
     // ui_draw_line(s, scene.lane_line_vertices[1], &color, nullptr);
@@ -226,16 +226,16 @@ static void ui_draw_vision_lane_lines(UIState *s) {
     } else {
       if (!scene.lateralPlan.lanelessModeStatus) {
         track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
-          nvgRGBA(red_lvl, green_lvl, 0, 160), nvgRGBA((int)(0.7*red_lvl), (int)(0.7*green_lvl), 0, 30));
+          nvgRGBA(red_lvl, green_lvl, 0, 160), nvgRGBA((int)(0.7*red_lvl), (int)(0.7*green_lvl), 0, 1));
       } else { //laneless status
         track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
-          nvgRGBA(red_lvl, 150, green_lvl, 160), nvgRGBA((int)(0.7*red_lvl), 150, (int)(0.7*green_lvl), 30));
+          nvgRGBA(red_lvl, 150, green_lvl, 160), nvgRGBA((int)(0.7*red_lvl), 150, (int)(0.7*green_lvl), 1));
       }
     }
   } else {
     // Draw white vision track
     track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
-                                        COLOR_WHITE_ALPHA(150), COLOR_WHITE_ALPHA(20));
+                                        COLOR_WHITE_ALPHA(150), COLOR_WHITE_ALPHA(1));
   }
   // paint path
   ui_draw_line(s, scene.track_vertices, nullptr, &track_bg);
