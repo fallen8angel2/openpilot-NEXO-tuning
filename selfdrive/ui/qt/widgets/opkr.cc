@@ -1516,7 +1516,7 @@ void CruisemodeSelInit::refresh() {
   }
 }
 
-LaneChangeSpeed::LaneChangeSpeed() : AbstractControl("LaneChange On/Off/Spd", "On/Off lane change(push (-) btn till Off value) and set the lane changeable speed.", "../assets/offroad/icon_shell.png") {
+LaneChangeSpeed::LaneChangeSpeed() : AbstractControl("LaneChange On/Off/Spd", "On/Off lane change(push (-) btn till Off value) and set the lane changeable speed. This value can be kph or mph.", "../assets/offroad/icon_shell.png") {
 
   label.setAlignment(Qt::AlignVCenter|Qt::AlignRight);
   label.setStyleSheet("color: #e0e879");
@@ -1548,9 +1548,9 @@ LaneChangeSpeed::LaneChangeSpeed() : AbstractControl("LaneChange On/Off/Spd", "O
   QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
     auto str = QString::fromStdString(params.get("OpkrLaneChangeSpeed"));
     int value = str.toInt();
-    value = value - 5;
-    if (value <= 15) {
-      value = 15;
+    value = value - 1;
+    if (value <= -1) {
+      value = 100;
     }
     QString values = QString::number(value);
     params.put("OpkrLaneChangeSpeed", values.toStdString());
@@ -1560,9 +1560,9 @@ LaneChangeSpeed::LaneChangeSpeed() : AbstractControl("LaneChange On/Off/Spd", "O
   QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
     auto str = QString::fromStdString(params.get("OpkrLaneChangeSpeed"));
     int value = str.toInt();
-    value = value + 5;
-    if (value >= 160) {
-      value = 160;
+    value = value + 1;
+    if (value >= 101) {
+      value = 0;
     }
     QString values = QString::number(value);
     params.put("OpkrLaneChangeSpeed", values.toStdString());
@@ -1573,7 +1573,7 @@ LaneChangeSpeed::LaneChangeSpeed() : AbstractControl("LaneChange On/Off/Spd", "O
 
 void LaneChangeSpeed::refresh() {
   QString option = QString::fromStdString(params.get("OpkrLaneChangeSpeed"));
-  if (option == "15") {
+  if (option == "0") {
     label.setText(QString::fromStdString("Off"));
   } else {
     label.setText(QString::fromStdString(params.get("OpkrLaneChangeSpeed")));
@@ -7052,7 +7052,7 @@ MultipleLatSelect::MultipleLatSelect() : AbstractControl("Multi LateralControl",
   QObject::connect(&btnminus, &QPushButton::clicked, [=]() {
     m_nMethod -= 1;
     if (m_nMethod < 0) {
-      m_nMethod = 2;
+      m_nMethod = 3;
     }
 
     QString values = QString::number(m_nMethod);
@@ -7063,7 +7063,7 @@ MultipleLatSelect::MultipleLatSelect() : AbstractControl("Multi LateralControl",
   QObject::connect(&btnplus, &QPushButton::clicked, [=]() {
   
     m_nMethod += 1;
-    if (m_nMethod > 2) {
+    if (m_nMethod > 3) {
       m_nMethod = 0;
     }
     QString values = QString::number(m_nMethod);
@@ -7078,9 +7078,10 @@ void MultipleLatSelect::refresh() {
 
   switch( m_nMethod )
   {
-    case 0 : strMethod = "0.Speed"; break;
-    case 1 : strMethod = "1.Angle"; break;
-    case 2 : strMethod = "2.Angle.L"; break;
+    case 0 : strMethod = "Spd_LowDlt"; break;
+    case 1 : strMethod = "Ang_LowDlt"; break;
+    case 2 : strMethod = "Ang_Interp"; break;
+    case 3 : strMethod = "Spd_Interp"; break;
     default :
       strMethod = "None"; 
       break;

@@ -46,7 +46,7 @@ def set_long_tune(tune, name):
 
 
 ###### LAT ######
-def set_lat_tune(tune, name, max_lat_accel=2.5, FRICTION=.1):
+def set_lat_tune(tune, name, max_lat_accel=2.5, TorqueFriction=.01, steering_angle_deadzone_deg=0.0):
   params = Params()
   if name == LatTunes.ATOM:
     tune.init('atom')
@@ -64,6 +64,7 @@ def set_lat_tune(tune, name, max_lat_accel=2.5, FRICTION=.1):
     tune.atom.torque.kf = TorqueKf / max_lat_accel        # 1.0 / 2.5 = 0.4
     tune.atom.torque.ki = TorqueKi / max_lat_accel        # 0.5 / 2.5 = 0.2
     tune.atom.torque.friction = TorqueFriction
+    tune.atom.torque.steeringAngleDeadzoneDeg = steering_angle_deadzone_deg
 
     # 2. LQR
     Scale = float(Decimal(params.get("Scale", encoding="utf8")) * Decimal('1.0'))
@@ -121,6 +122,7 @@ def set_lat_tune(tune, name, max_lat_accel=2.5, FRICTION=.1):
     tune.torque.kf = TorqueKf / max_lat_accel # 1.0/2.5 = 0.4
     tune.torque.ki = TorqueKi / max_lat_accel # 0.5/2.5 = 0.2
     tune.torque.friction = TorqueFriction
+    tune.torque.steeringAngleDeadzoneDeg = steering_angle_deadzone_deg    
   elif name == LatTunes.LQR:
     Scale = float(Decimal(params.get("Scale", encoding="utf8")) * Decimal('1.0'))
     LqrKi = float(Decimal(params.get("LqrKi", encoding="utf8")) * Decimal('0.001'))
