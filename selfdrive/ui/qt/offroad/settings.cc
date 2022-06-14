@@ -767,6 +767,7 @@ TuningPanel::TuningPanel(QWidget *parent) : QFrame(parent) {
     layout->addWidget(new TorqueKi());
     layout->addWidget(new TorqueFriction());
     layout->addWidget(new TorqueUseAngle());
+    layout->addWidget(new TorqueAngDeadZone());
   } else if (lat_control == "4") {
     layout->addWidget(new MultipleLatSelect());
     layout->addWidget(new MultipleLateralSpeed());
@@ -777,6 +778,7 @@ TuningPanel::TuningPanel(QWidget *parent) : QFrame(parent) {
     layout->addWidget(new TorqueKi());
     layout->addWidget(new TorqueFriction());
     layout->addWidget(new TorqueUseAngle());
+    layout->addWidget(new TorqueAngDeadZone());
     layout->addWidget(new Scale());
     layout->addWidget(new LqrKi());
     layout->addWidget(new DcGain());
