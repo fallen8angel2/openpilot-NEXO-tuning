@@ -43,9 +43,9 @@ def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
   left_lane_warning = 0
   right_lane_warning = 0
   if left_lane_depart:
-    left_lane_warning = 1 if fingerprint in (CAR.GENESIS_DH, CAR.GENESIS_G90_HI, CAR.GENESIS_G80_DH, GENESIS_G70_IK) else 2
+    left_lane_warning = 1 if fingerprint in (CAR.GENESIS_DH, CAR.GENESIS_G90_HI, CAR.GENESIS_G80_DH, CAR.GENESIS_G70_IK) else 2
   if right_lane_depart:
-    right_lane_warning = 1 if fingerprint in (CAR.GENESIS_DH, CAR.GENESIS_G90_HI, CAR.GENESIS_G80_DH, GENESIS_G70_IK) else 2
+    right_lane_warning = 1 if fingerprint in (CAR.GENESIS_DH, CAR.GENESIS_G90_HI, CAR.GENESIS_G80_DH, CAR.GENESIS_G70_IK) else 2
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
@@ -215,11 +215,18 @@ class CarController():
       self.str_log2 = 'T={:04.0f}/{:05.3f}/{:07.5f}'.format(CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain)
     elif CP.lateralTuning.which() == 'torque':
       self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction)
-    # else : #'MultiLateral'
-    #   self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f} L={:04.0f}/{:05.3f}/{:07.5f} P={:0.2f}/{:0.3f}/{:0.2f}/{:0.5f}'.format( \
-    #     CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction, \
-    #     CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain, \
-    #     CP.lateralTuning.pid.kpV[1], CP.lateralTuning.pid.kiV[1], CP.lateralTuning.pid.kdV[0], CP.lateralTuning.pid.kf)
+    else : #'MultiLateral'
+      max_lat_accel = float(Decimal(self.params.get("TorqueMaxLatAccel", encoding="utf8"))*Decimal('0.1'))
+      self.str_log2 = 'T={:3.1f}/{:0.2f}/{:0.2f}/{:0.2f}/{:0.2f} Q={:04.0f}/{:05.3f}/{:07.5f} P={:0.2f}/{:0.3f}/{:0.1f}/{:0.5f}'.format( \
+        max_lat_accel, float(Decimal(self.params.get("TorqueKp", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
+          float(Decimal(self.params.get("TorqueKf", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
+          float(Decimal(self.params.get("TorqueKi", encoding="utf8"))*Decimal('0.1'))/max_lat_accel, \
+          float(Decimal(self.params.get("TorqueFriction", encoding="utf8")) * Decimal('0.001')), \
+        float(Decimal(self.params.get("Scale", encoding="utf8"))*Decimal('1.0')), \
+          float(Decimal(self.params.get("LqrKi", encoding="utf8"))*Decimal('0.001')), float(Decimal(self.params.get("DcGain", encoding="utf8"))*Decimal('0.00001')), \
+        float(Decimal(self.params.get("PidKp", encoding="utf8"))*Decimal('0.01')), \
+          float(Decimal(self.params.get("PidKi", encoding="utf8"))*Decimal('0.001')), float(Decimal(self.params.get("PidKd", encoding="utf8"))*Decimal('0.01')), \
+          float(Decimal(self.params.get("PidKf", encoding="utf8"))*Decimal('0.00001')))
 
     self.sm = messaging.SubMaster(['controlsState', 'radarState', 'longitudinalPlan'])
 
@@ -428,7 +435,7 @@ class CarController():
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active and not self.lkas_temp_disabled,
                                    cut_steer_temp, CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, CS.CP.sccBus, self.ldws_fix, self.lkas11_cnt))
-    elif CS.CP.mdpsBus: # send lkas11 bus 1 if mdps is bus 1
+    if CS.CP.mdpsBus: # send lkas11 bus 1 if mdps is bus 1
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active and not self.lkas_temp_disabled,
                                    cut_steer_temp, CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 1, self.ldws_fix, self.lkas11_cnt))
@@ -886,6 +893,7 @@ class CarController():
             elif aReqValue < 0.0 and self.stopping_dist_adj_enabled:
               stock_weight = interp(abs(lead_objspd), [1.0, 4.0, 6.0, 20.0, 50.0], [0.2, 0.4, 1.0, 1.0, 0.1])
               accel = accel * (1.0 - stock_weight) + aReqValue * stock_weight
+              accel = min(accel, -0.4) if CS.lead_distance <= 4.5 and not CS.out.standstill else accel
             elif aReqValue < 0.0:
               stock_weight = interp(CS.lead_distance, [6.0, 10.0, 18.0, 25.0, 32.0], [1.0, 0.85, 1.0, 0.4, 1.0])
               accel = accel * (1.0 - stock_weight) + aReqValue * stock_weight
