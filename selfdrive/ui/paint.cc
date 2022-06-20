@@ -261,7 +261,7 @@ static void ui_draw_world(UIState *s) {
     }
     if (s->scene.stop_line && !lead_one.getStatus()) {
       auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
-      if (stop_line.getProb() > .5 && stop_line > 0) {
+      if (stop_line.getProb() > .5) {
         ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
       }
     }
