@@ -2041,7 +2041,7 @@ static void ui_draw_vision(UIState *s) {
     }
     if (scene->brakeHold &&) {
       ui_draw_auto_hold(s);
-    }ui_draw_vision
+    }
     if (s->scene.animated_rpm) {
       ui_draw_rpm_animation(s);
     }
