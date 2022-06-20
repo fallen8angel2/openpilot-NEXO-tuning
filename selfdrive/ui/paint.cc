@@ -2039,7 +2039,7 @@ static void ui_draw_vision(UIState *s) {
     if (scene->top_text_view > 0) {
       draw_datetime_osm_info_text(s);
     }
-    if (scene->brakeHold &&) {
+    if (scene->brakeHold) {
       ui_draw_auto_hold(s);
     }
     if (s->scene.animated_rpm) {
