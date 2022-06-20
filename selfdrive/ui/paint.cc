@@ -2028,27 +2028,26 @@ static void ui_draw_vision(UIState *s) {
   ui_draw_vision_header(s);
   if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
     ui_draw_vision_face(s);
-    // if (false) { //!scene->comma_stock_ui) {
-    //   ui_draw_blindspot_mon(s);
-    // }
   }
   if (scene->live_tune_panel_enable) {
     ui_draw_live_tune_panel(s);
   }
-  if (scene->top_text_view > 0 && !scene->comma_stock_ui) {
-    draw_datetime_osm_info_text(s);
-  }
-  if (scene->brakeHold && !scene->comma_stock_ui) {
-    ui_draw_auto_hold(s);
-  }
-  if (s->scene.animated_rpm && !scene->comma_stock_ui) {
-    ui_draw_rpm_animation(s);
-  }
   if (scene->cal_view) {
     ui_draw_grid(s);
-  }
-  if (s->scene.stop_line && !scene->comma_stock_ui) {
-    ui_draw_stop_sign(s);
+  }  
+  if (!scene->comma_stock_ui) {
+    if (scene->top_text_view > 0) {
+      draw_datetime_osm_info_text(s);
+    }
+    if (scene->brakeHold &&) {
+      ui_draw_auto_hold(s);
+    }ui_draw_vision
+    if (s->scene.animated_rpm) {
+      ui_draw_rpm_animation(s);
+    }
+    if (s->scene.stop_line) {
+      ui_draw_stop_sign(s);
+    }
   }
 }
 
