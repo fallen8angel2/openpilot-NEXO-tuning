@@ -164,6 +164,27 @@ static void ui_draw_stop_line(UIState *s, const cereal::ModelDataV2::StopLineDat
   ui_draw_line(s, vd, &color, nullptr);
 }
 
+static void ui_draw_stop_sign(UIState *s) {
+  float center_x = 1400.0f;
+  float center_y = 100.0f;
+  float radius_i = 5.0f;
+  float radius_o = 75.0f;
+
+  if (s->scene.longitudinalPlan.e2ex[12] > 50 && s->scene.longitudinalPlan.stopline[12] < 10 && s->scene.radarDistance > 149 ) {
+    nvgBeginPath(s->vg);
+    nvgCircle(s->vg, center_x, center_y, radius_i+radius_o);
+    NVGpaint stop_sign = nvgRadialGradient(s->vg, center_x, center_y, radius_i, radius_o, nvgRGBAf(0.0, 1.0, 0.0, 0.9), nvgRGBAf(0.0, 0.0, 0.0, 0.3));
+    nvgFillPaint(s->vg, stop_sign);
+    nvgFill(s->vg);
+  } else if (s->scene.longitudinalPlan.e2ex[12] < 100 && s->scene.longitudinalPlan.stopline[12] < 100 && s->scene.radarDistance > 149 ) {
+    nvgBeginPath(s->vg);
+    nvgCircle(s->vg, center_x, center_y, radius_i+radius_o);
+    NVGpaint stop_sign = nvgRadialGradient(s->vg, center_x, center_y, radius_i, radius_o, nvgRGBAf(1.0, 0.0, 0.0, 0.9), nvgRGBAf(0.0, 0.0, 0.0, 0.3));
+    nvgFillPaint(s->vg, stop_sign);
+    nvgFill(s->vg);
+  }
+}
+
 static void ui_draw_vision_lane_lines(UIState *s) {
   UIScene &scene = s->scene;
   NVGpaint track_bg;
@@ -259,7 +280,7 @@ static void ui_draw_world(UIState *s) {
     if (lead_two.getStatus() && (std::abs(lead_one.getDRel() - lead_two.getDRel()) > 3.0)) {
       draw_lead(s, lead_two, s->scene.lead_vertices[1]);
     }
-    if (s->scene.stop_line && !lead_one.getStatus()) {
+    if (s->scene.stop_line) {
       auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
       if (stop_line.getProb() > .5) {
         ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
@@ -489,14 +510,14 @@ static void ui_draw_debug(UIState *s) {
         ui_draw_text(s, ui_viz_rx_center, bdr_s+300, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-          ui_draw_text(s, ui_viz_rx_center, bdr_s+340, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+          ui_draw_text(s, ui_viz_rx_center, bdr_s+340, szLaCMethodCur, 45, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     } else {
       if( szLaCMethod )
         ui_draw_text(s, ui_viz_rx_center, bdr_s+325, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-          ui_draw_text(s, ui_viz_rx_center, bdr_s+365, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+          ui_draw_text(s, ui_viz_rx_center, bdr_s+365, szLaCMethodCur, 45, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     }
   }
@@ -2006,24 +2027,26 @@ static void ui_draw_vision(UIState *s) {
   ui_draw_vision_header(s);
   if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
     ui_draw_vision_face(s);
-    // if (false) { //!scene->comma_stock_ui) {
-    //   ui_draw_blindspot_mon(s);
-    // }
   }
   if (scene->live_tune_panel_enable) {
     ui_draw_live_tune_panel(s);
   }
-  if (scene->top_text_view > 0 && !scene->comma_stock_ui) {
-    draw_datetime_osm_info_text(s);
-  }
-  if (scene->brakeHold && !scene->comma_stock_ui) {
-    ui_draw_auto_hold(s);
-  }
-  if (s->scene.animated_rpm && !scene->comma_stock_ui) {
-    ui_draw_rpm_animation(s);
-  }
   if (scene->cal_view) {
     ui_draw_grid(s);
+  }  
+  if (!scene->comma_stock_ui) {
+    if (scene->top_text_view > 0) {
+      draw_datetime_osm_info_text(s);
+    }
+    if (scene->brakeHold) {
+      ui_draw_auto_hold(s);
+    }
+    if (s->scene.animated_rpm) {
+      ui_draw_rpm_animation(s);
+    }
+    if (s->scene.stop_line) {
+      ui_draw_stop_sign(s);
+    }
   }
 }
 
