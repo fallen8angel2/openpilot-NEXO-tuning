@@ -490,14 +490,14 @@ static void ui_draw_debug(UIState *s) {
         ui_draw_text(s, ui_viz_rx_center, bdr_s+300, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-          ui_draw_text(s, ui_viz_rx_center, bdr_s+340, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+          ui_draw_text(s, ui_viz_rx_center, bdr_s+340, szLaCMethodCur, 45, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     } else {
       if( szLaCMethod )
         ui_draw_text(s, ui_viz_rx_center, bdr_s+325, szLaCMethod, 50, COLOR_WHITE_ALPHA(150), "KaiGenGothicKR-Medium");
       if (scene.lateralControlMethod == 4) {
         if( szLaCMethodCur )
-          ui_draw_text(s, ui_viz_rx_center, bdr_s+365, szLaCMethodCur, 55, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
+          ui_draw_text(s, ui_viz_rx_center, bdr_s+365, szLaCMethodCur, 45, COLOR_OCHRE_ALPHA(150), "KaiGenGothicKR-Medium");
         }
     }
   }
