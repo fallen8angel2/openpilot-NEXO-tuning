@@ -379,6 +379,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"GitCommits", CLEAR_ON_MANAGER_START},
     {"RTShield", PERSISTENT},
     {"OSMOfflineUse", PERSISTENT},
+    {"StopAtStopSign", PERSISTENT},
 };
 
 } // namespace
