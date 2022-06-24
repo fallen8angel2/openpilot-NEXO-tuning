@@ -229,6 +229,8 @@ class LongitudinalMpc:
     self.stopline = np.zeros(13, dtype=np.float64)
     self.stop_prob = 0.0
 
+    self.on_stopping = False
+
   def reset(self):
     # self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
     self.solver.reset()
@@ -399,16 +401,19 @@ class LongitudinalMpc:
                                v_upper)
     cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, self.desired_TR)
 
-    stopline = (model.stopLine.x + 6.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
-    x = (x[N] + 6.0) * np.ones(N+1)
+    stopline = (model.stopLine.x + 5.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
+    x = (x[N] + 5.0) * np.ones(N+1)
 
-    if self.status:
+    if self.status and not self.on_stopping:
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
     elif x[N] > 30 and stopline[N] < 30 and self.v_ego < 6.0:
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*2, x])
+      self.on_stopping = False
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle, x])
     elif x[N] < 100 and stopline[N] < 100:
+      self.on_stopping = True
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*2, (stopline+x)/2])
     else:
+      self.on_stopping = False
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
 
     self.source = SOURCES[np.argmin(x_obstacles[N])]
